@@ -28,6 +28,7 @@
             touch-action: manipulation; 
         }
 
+        /* 플래시 이펙트 레이어 */
         #flash-layer {
             position: fixed;
             top: 0;
@@ -167,7 +168,6 @@
             pointer-events: none;
         }
 
-        /* [수정] B 이미지 위치 미세 조정 (-40px -> -39px) */
         #img-b {
             right: -39px; 
             width: 80px;
@@ -328,7 +328,7 @@
         <div id="target-line"></div>
     </div>
 
-    <button id="action-btn">MASH! (SPACE)</button>
+    <button id="action-btn">SPACE! (SPACE)</button>
 </div>
 
 <script>
@@ -691,7 +691,8 @@
             if (state.isRestartLocked) return; 
             clearGameOverUI();
             startGame();
-            btnAction.innerText = "MASH!";
+            // [수정] 게임 중 텍스트 SPACE!
+            btnAction.innerText = "SPACE!";
         } else {
             increaseGauge();
         }
