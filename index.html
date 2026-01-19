@@ -66,6 +66,8 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             border: 2px solid #666;
             line-height: 1.6;
+            display: flex;
+            flex-direction: column;
         }
 
         .intro-content p { margin-bottom: 20px; font-size: 18px; }
@@ -85,7 +87,18 @@
             box-shadow: 0 5px 0 #00bfa5;
             font-family: 'Escoredream', sans-serif;
             display: block;
-            margin: 30px auto 0 auto;
+            margin: 10px auto 20px auto; /* 아래쪽 여백 추가 */
+        }
+
+        /* [신규] 저작권 고지 텍스트 스타일 */
+        .disclaimer-text {
+            font-size: 11px;
+            color: #aaa; /* 밝은 회색 */
+            text-align: center;
+            line-height: 1.4;
+            margin-top: 10px;
+            border-top: 1px solid #555;
+            padding-top: 10px;
         }
 
         /* 플래시 레이어 */
@@ -356,6 +369,10 @@
         <p>스테이지가 올라갈수록 판정선은 더 빠르게 움직이고, <span class="highlight-blue">칼리스토</span>도 재빨라집니다.</p>
         <p><span class="highlight-blue">마튼</span>이 몇 명의 <span class="highlight-blue">호엔하임</span>을 구할 수 있을까요?</p>
         <button id="intro-close-btn">확인</button>
+        
+        <div class="disclaimer-text">
+            이 프로젝트는 프로젝트문 창작물의 2차창작 팬 프로그램입니다. 비영리 목적으로 제작되었으며, 원작자의 가이드라인을 최대한 준수하고자 합니다. 포함된 아트워크의 권리와 저작권은 해당 저작권자가 가지고 있음을 알립니다.
+        </div>
     </div>
 </div>
 
@@ -438,7 +455,6 @@
     btnIntroClose.addEventListener('click', () => {
         elIntroModal.style.display = 'none';
         state.isModalOpen = false;
-        // 게임 시작 시 lastTime 초기화 (델타 타임 튀는 것 방지)
         state.lastTime = performance.now();
     });
 
@@ -484,24 +500,18 @@
     function gameLoop(timestamp) {
         if (!state.isPlaying) return;
 
-        // [중요] Delta Time 보정 (60FPS 기준)
-        const dt = (timestamp - state.lastTime) / 1000; // 초 단위 경과 시간
+        const dt = (timestamp - state.lastTime) / 1000; 
         state.lastTime = timestamp;
         
-        // 60FPS 기준 비율 (약 1.0)
-        // 120FPS라면 dt가 절반이므로 timeScale은 약 0.5가 됨
-        // 30FPS라면 dt가 두배이므로 timeScale은 약 2.0이 됨
         const timeScale = dt * 60; 
 
         const stats = getStageStats(state.stage);
 
-        // 1. 게이지 감소 (시간 보정 적용)
         if (state.gauge > 0) { 
             state.gauge -= stats.decay * timeScale; 
             if (state.gauge < 0) state.gauge = 0; 
         }
 
-        // 2. 판정선 이동 (시간 보정 적용)
         if (Math.abs(state.targetPos - state.targetDest) < 2) { 
             state.targetDest = Math.random() * 80 + 15; 
         }
@@ -521,20 +531,19 @@
         let finalJudgment = rawJudgment;
         if (rawJudgment === "PERFECT") { state.graceTimer = CONFIG.gracePeriod; }
         else if (state.graceTimer > 0) { 
-            state.graceTimer -= dt; // 타이머는 실제 초 단위 감소
+            state.graceTimer -= dt; 
             finalJudgment = "PERFECT"; 
             rawEfficiency = 1; 
         }
 
         let displayText = "", textGlow = "", moveAmount = 0, bgClass = "bg-normal", effectAlpha = 0.2;
 
-        // 3. A 위치 이동 계산 (시간 보정 적용)
         if (finalJudgment === "LOW") {
             displayText = "LOW"; textGlow = "0 0 10px #888"; 
-            moveAmount = stats.enemySpeed * timeScale; // 적이 당김
+            moveAmount = stats.enemySpeed * timeScale; 
             state.perfectDuration = 0; bgClass = "bg-miss";
         } else if (finalJudgment === "PERFECT") {
-            state.perfectDuration += dt; // 실제 시간 누적
+            state.perfectDuration += dt; 
             let currentPullSpeed = CONFIG.perfectPullSpeed;
             if (state.perfectDuration >= CONFIG.sustainThreshold) {
                 const extraTime = state.perfectDuration - CONFIG.sustainThreshold;
@@ -547,7 +556,7 @@
                 displayText = "PERFECT"; textGlow = "0 0 10px #4caf50, 0 0 20px #4caf50"; 
                 bgClass = "bg-perfect"; effectAlpha = 0.7;
             }
-            moveAmount = -currentPullSpeed * timeScale; // 내가 당김
+            moveAmount = -currentPullSpeed * timeScale; 
         } else if (finalJudgment === "GOOD") {
             state.perfectDuration = 0; displayText = "GOOD"; textGlow = "0 0 10px #ffeb3b, 0 0 20px #ffeb3b"; 
             moveAmount = (stats.enemySpeed - (CONFIG.pullPower * rawEfficiency)) * timeScale;
@@ -586,7 +595,7 @@
     function startGame() {
         state.isPlaying = true; state.posA = 50; state.gauge = 0; state.stage = 1;
         state.targetPos = 50; state.targetDest = 60; 
-        state.lastTime = performance.now(); // 시간 초기화
+        state.lastTime = performance.now(); 
         state.perfectDuration = 0; state.graceTimer = 0;
         
         elStageInfo.innerText = "STAGE 1"; elFloatingContainer.innerHTML = '';
@@ -613,7 +622,7 @@
         elFlashLayer.className = ""; void elFlashLayer.offsetWidth; elFlashLayer.classList.add("flash-white");
         elBgOverlay.className = "bg-normal";
         state.posA = 50; state.gauge = 0; state.perfectDuration = 0; 
-        state.lastTime = performance.now(); // 시간 재설정
+        state.lastTime = performance.now(); 
         render();
         state.animationId = requestAnimationFrame(gameLoop);
     }
