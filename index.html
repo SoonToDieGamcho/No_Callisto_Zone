@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>NoCallisto</title>
     <link rel="icon" href="images/fav.png" type="image/png">
     
@@ -14,28 +14,45 @@
             font-display: swap;
         }
 
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             font-family: 'Escoredream', sans-serif;
             margin: 0;
+            padding: 0;
+            width: 100vw;
             height: 100vh;
-            overflow: hidden;
-            user-select: none;
+            overflow: hidden; /* 스크롤 방지 */
+            background-color: #000; /* 레터박스 색상 */
+            /* 배경 이미지는 게임 컨테이너 밖이 아니라 컨테이너 뒤쪽 혹은 꽉 차게 처리 */
             display: flex;
             justify-content: center;
             align-items: center;
-            background: url('images/bg.png') no-repeat center center;
-            background-size: cover;
-            touch-action: manipulation; 
+            touch-action: none; /* 모바일 제스처 방지 */
         }
 
-        /* 인트로 모달 */
+        /* 배경 (화면 전체 덮기) */
+        #global-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('images/bg.png') no-repeat center center;
+            background-size: cover;
+            z-index: -1;
+        }
+
+        /* ==================== 모달 스타일 ==================== */
         #intro-modal {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.8);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -86,12 +103,30 @@
             z-index: 900; 
             opacity: 0;
         }
-
         .flash-white { animation: flash-w 0.6s ease-out; }
         @keyframes flash-w { 0% { background-color: white; opacity: 0.8; } 100% { background-color: white; opacity: 0; } }
-
         .flash-red { animation: flash-r 0.6s ease-out; }
         @keyframes flash-r { 0% { background-color: red; opacity: 0.6; } 100% { background-color: red; opacity: 0; } }
+
+        /* [핵심] 게임 컨테이너: 크기 고정, 스케일링으로 조정 */
+        #game-container {
+            width: 800px;  /* 기준 너비 */
+            height: 500px; /* 기준 높이 */
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            /* transform은 JS에서 제어 (translate(-50%, -50%) scale(...)) */
+            transform-origin: center center;
+            
+            background: url('images/box.png') no-repeat center center;
+            background-size: 100% 100%; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start; 
+            align-items: center;
+            overflow: hidden; 
+        }
 
         #bg-overlay {
             position: absolute;
@@ -109,20 +144,6 @@
         .bg-perfect { background-color: #3DFFEA; opacity: 0.4; }
         .bg-bonus { background-color: #63F2FF; opacity: 0.6; }
         .bg-miss { background-color: #3DFFEA; opacity: 0.05; }
-
-        #game-container {
-            width: 800px;
-            height: 500px;
-            position: relative;
-            background: url('images/box.png') no-repeat center center;
-            background-size: 100% 100%; 
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start; 
-            align-items: center;
-            overflow: hidden; 
-        }
 
         #stage-info {
             margin-top: 30px; 
@@ -286,7 +307,6 @@
             z-index: 50; 
             margin-top: 5px;
             transition: all 0.1s;
-            /* 터치 시 하이라이트 방지 */
             -webkit-tap-highlight-color: transparent;
             user-select: none;
         }
@@ -316,9 +336,24 @@
             width: 100%;
             text-align: center;
         }
+
+        .game-over-sub {
+            position: absolute;
+            top: 48%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 18px;
+            color: #fff;
+            text-shadow: 1px 1px 2px black;
+            z-index: 100;
+            text-align: center;
+            line-height: 1.5;
+        }
     </style>
 </head>
 <body>
+
+<div id="global-bg"></div>
 
 <div id="intro-modal">
     <div class="intro-content">
@@ -363,6 +398,30 @@
 </div>
 
 <script>
+    // [신규] 화면 비율 고정 로직
+    function resizeGame() {
+        const gameContainer = document.getElementById('game-container');
+        const targetWidth = 800;
+        const targetHeight = 500;
+        
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+        
+        // 화면 대비 게임 컨테이너의 비율 계산
+        const scaleX = windowWidth / targetWidth;
+        const scaleY = windowHeight / targetHeight;
+        
+        // 더 작은 비율에 맞춰 축소/확대 (화면에 꽉 차게)
+        const scale = Math.min(scaleX, scaleY);
+        
+        // 스케일 적용 (중앙 정렬 유지)
+        gameContainer.style.transform = `translate(-50%, -50%) scale(${scale})`;
+    }
+
+    // 초기 실행 및 리사이즈 이벤트 등록
+    window.addEventListener('resize', resizeGame);
+    window.addEventListener('load', resizeGame);
+
     const CONFIG = {
         baseDecay: 1.0, decayGrowth: 0.12, baseClick: 16, clickGrowth: 0.5,
         baseEnemySpeed: 0.06, pullPower: 0.5, perfectPullSpeed: 0.6,
@@ -377,7 +436,6 @@
         isRestartLocked: false, isModalOpen: true 
     };
 
-    // DOM References
     const elIntroModal = document.getElementById('intro-modal');
     const btnIntroClose = document.getElementById('intro-close-btn');
     const elFlashLayer = document.getElementById('flash-layer');
@@ -391,7 +449,6 @@
     const elFloatingContainer = document.getElementById('floating-text-container');
     const elEffectC = document.getElementById('effect-c');
     
-    // Stats
     const elDispDecay = document.getElementById('disp-decay'), elDiffDecay = document.getElementById('diff-decay');
     const elDispEnemy = document.getElementById('disp-enemy'), elDiffEnemy = document.getElementById('diff-enemy');
     const elDispTarget = document.getElementById('disp-target'), elDiffTarget = document.getElementById('diff-target');
@@ -526,7 +583,7 @@
         state.perfectDuration = 0; state.graceTimer = 0;
         elStageInfo.innerText = "STAGE 1"; elFloatingContainer.innerHTML = '';
         elAccuracyText.innerText = "START"; elAccuracyText.style.textShadow = "none";
-        elAccuracyText.style.fontSize = "24px"; // 폰트 크기 초기화
+        elAccuracyText.style.fontSize = "24px"; 
         elFlashLayer.className = ""; elBgOverlay.className = "bg-normal";
         updateStatsUI(null);
         state.animationId = requestAnimationFrame(gameLoop);
@@ -555,8 +612,6 @@
     function gameOver() {
         state.isPlaying = false; state.isRestartLocked = true; cancelAnimationFrame(state.animationId);
         elFloatingContainer.innerHTML = ''; 
-        
-        // 판정 텍스트 비우고 게임오버 UI 덮어쓰기 X -> 아래에 추가
         elAccuracyText.innerText = ""; 
 
         const titleDiv = document.createElement('div');
@@ -567,7 +622,6 @@
         const maxStage = Math.max(state.stage, parseInt(savedMax));
         localStorage.setItem('ptw_max_stage', maxStage);
 
-        // 기록 텍스트: 판정 텍스트 칸(elAccuracyText)에 주입
         elAccuracyText.innerHTML = `기록: STAGE ${state.stage} &nbsp;|&nbsp; 최고: STAGE ${maxStage}`;
         elAccuracyText.style.fontSize = "16px";
         elAccuracyText.style.textShadow = "none";
@@ -579,22 +633,19 @@
     }
 
     function clearGameOverUI() {
-        // elAccuracyText는 startGame에서 START로 덮어씌워짐
+        const sub = document.querySelector('.game-over-sub'); if(sub) sub.remove();
     }
 
-    // 모바일 입력 중복 방지 로직
     let lastTouchTime = 0;
-
     btnAction.addEventListener('touchstart', (e) => {
-        e.preventDefault(); 
-        e.stopPropagation();
+        e.preventDefault(); e.stopPropagation();
         lastTouchTime = Date.now();
         handleInput();
     }, { passive: false });
 
     btnAction.addEventListener('mousedown', (e) => {
         e.stopPropagation();
-        if (Date.now() - lastTouchTime < 500) return; // 고스트 클릭 방지
+        if (Date.now() - lastTouchTime < 500) return; 
         handleInput();
     });
 
@@ -604,11 +655,14 @@
         if (state.isModalOpen) return;
         if (!state.isPlaying) {
             if (state.isRestartLocked) return;
-            startGame(); btnAction.innerText = "SPACE!";
+            clearGameOverUI(); startGame(); btnAction.innerText = "SPACE!";
         } else { increaseGauge(); }
     }
 
+    // 초기 실행
     updateStatsUI(null); render();
+    // 로드 후 100ms 뒤에 한번 더 리사이즈 (모바일 주소창 대응)
+    setTimeout(resizeGame, 100);
 </script>
 </body>
 </html>
