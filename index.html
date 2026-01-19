@@ -28,7 +28,55 @@
             touch-action: manipulation; 
         }
 
-        /* 플래시 이펙트 레이어 */
+        /* 인트로 모달 */
+        #intro-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .intro-content {
+            background: #444;
+            color: #fff;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: left;
+            max-width: 600px;
+            width: 90%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 2px solid #666;
+            line-height: 1.6;
+        }
+
+        .intro-content p { margin-bottom: 20px; font-size: 18px; }
+        
+        .highlight-blue { color: #3DFFEA; font-weight: bold; }
+        .highlight-perfect { text-shadow: 0 0 10px #4caf50; font-weight: bold; color: #fff; }
+        .highlight-max { text-shadow: 0 0 15px #3DFFEA, 0 0 30px #3DFFEA; font-weight: bold; color: #fff; }
+
+        #intro-close-btn {
+            padding: 15px 40px;
+            font-size: 20px;
+            background: #3DFFEA;
+            border: none;
+            color: #222;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #00bfa5;
+            font-family: 'Escoredream', sans-serif;
+            display: block;
+            margin: 30px auto 0 auto;
+        }
+
+        /* 플래시 레이어 */
         #flash-layer {
             position: fixed;
             top: 0;
@@ -41,17 +89,12 @@
         }
 
         .flash-white { animation: flash-w 0.6s ease-out; }
-        @keyframes flash-w {
-            0% { background-color: white; opacity: 0.8; }
-            100% { background-color: white; opacity: 0; }
-        }
+        @keyframes flash-w { 0% { background-color: white; opacity: 0.8; } 100% { background-color: white; opacity: 0; } }
 
         .flash-red { animation: flash-r 0.6s ease-out; }
-        @keyframes flash-r {
-            0% { background-color: red; opacity: 0.6; }
-            100% { background-color: red; opacity: 0; }
-        }
+        @keyframes flash-r { 0% { background-color: red; opacity: 0.6; } 100% { background-color: red; opacity: 0; } }
 
+        /* 배경 틴트 */
         #bg-overlay {
             position: absolute;
             top: 0;
@@ -147,12 +190,8 @@
             z-index: 20;
         }
 
-        #img-c {
-            left: -20px; 
-            width: 100px; 
-            height: auto;
-        }
-
+        #img-c { left: -20px; width: 100px; height: auto; }
+        
         #effect-c {
             position: absolute;
             left: -50px;
@@ -168,11 +207,7 @@
             pointer-events: none;
         }
 
-        #img-b {
-            right: -39px; 
-            width: 80px;
-            height: auto;
-        }
+        #img-b { right: -39px; width: 80px; height: auto; }
 
         #player-a {
             width: 77px; 
@@ -227,7 +262,6 @@
         }
         
         .stat-val { color: #fff; font-weight: bold; }
-        
         .stat-diff {
             display: inline-block;
             margin-left: 5px;
@@ -267,9 +301,10 @@
             cursor: not-allowed;
         }
 
+        /* 게임오버 관련 스타일 */
         .game-over-title {
             position: absolute; 
-            top: 40%;
+            top: 40%; /* 화면 상단 40% 위치 */
             left: 50%;
             transform: translate(-50%, -50%);
             font-size: 60px;
@@ -281,9 +316,10 @@
             text-align: center;
         }
 
+        /* 기록 텍스트: 48% 위치로 설정하여 제목 바로 밑에 붙음 */
         .game-over-sub {
             position: absolute;
-            top: 48%;
+            top: 48%; 
             left: 50%;
             transform: translateX(-50%);
             font-size: 18px;
@@ -293,18 +329,26 @@
             text-align: center;
             line-height: 1.5;
         }
-        
     </style>
 </head>
 <body>
+
+<div id="intro-modal">
+    <div class="intro-content">
+        <p><span class="highlight-blue">칼리스토</span>가 <span class="highlight-blue">호엔하임</span>에게 다가가는 것을 막아야 합니다!</p>
+        <p><span class="highlight-blue">SPACE</span>를 연타하면 게이지가 오르며, 움직이는 판정선에 가깝게 게이지를 유지하면 칼리스토를 빛으로 유혹할 수 있습니다.</p>
+        <p>판정선에 가깝게 <span class="highlight-perfect">PERFECT</span>를 유지하면 <span class="highlight-max">MAX</span>상태로 돌입해 더욱 빠르게 끌어들일 수 있습니다.</p>
+        <p>스테이지가 올라갈수록 판정선은 더 빠르게 움직이고, <span class="highlight-blue">칼리스토</span>도 재빨라집니다.</p>
+        <p><span class="highlight-blue">마튼</span>이 몇 명의 <span class="highlight-blue">호엔하임</span>을 구할 수 있을까요?</p>
+        <button id="intro-close-btn">확인</button>
+    </div>
+</div>
 
 <div id="flash-layer"></div>
 
 <div id="game-container">
     <div id="bg-overlay"></div>
-
     <div id="stage-info">STAGE 1</div>
-    
     <div id="floating-text-container"></div>
     
     <div id="stats-corner">
@@ -333,42 +377,22 @@
 
 <script>
     const CONFIG = {
-        baseDecay: 1.0,         
-        decayGrowth: 0.12,      
-        baseClick: 16,          
-        clickGrowth: 0.5,       
-        
-        baseEnemySpeed: 0.06,   
-        pullPower: 0.5,         
-        perfectPullSpeed: 0.6,  
-        targetMoveSpeed: 0.2,   
-        targetMoveGrowth: 0.1,  
-        
-        tolerance: 8.5,         
-        minActiveGauge: 10,
-        
-        sustainThreshold: 0.5, 
-        sustainBaseMult: 1.3,  
-        sustainIncMult: 0.03,  
-        sustainInterval: 0.1,
-        
+        baseDecay: 1.0, decayGrowth: 0.12, baseClick: 16, clickGrowth: 0.5,
+        baseEnemySpeed: 0.06, pullPower: 0.5, perfectPullSpeed: 0.6,
+        targetMoveSpeed: 0.2, targetMoveGrowth: 0.1, tolerance: 8.5, minActiveGauge: 10,
+        sustainThreshold: 0.5, sustainBaseMult: 1.3, sustainIncMult: 0.03, sustainInterval: 0.1,
         gracePeriod: 0.05 
     };
 
     let state = {
-        stage: 1,
-        posA: 50,
-        gauge: 0,
-        targetPos: 60,
-        targetDest: 60,
-        isPlaying: false,
-        lastTime: 0,
-        perfectDuration: 0,
-        graceTimer: 0,
-        isRestartLocked: false 
+        stage: 1, posA: 50, gauge: 0, targetPos: 60, targetDest: 60,
+        isPlaying: false, lastTime: 0, perfectDuration: 0, graceTimer: 0,
+        isRestartLocked: false, isModalOpen: true 
     };
 
-    // DOM Elements
+    // DOM References
+    const elIntroModal = document.getElementById('intro-modal');
+    const btnIntroClose = document.getElementById('intro-close-btn');
     const elFlashLayer = document.getElementById('flash-layer');
     const elBgOverlay = document.getElementById('bg-overlay');
     const elPlayerA = document.getElementById('player-a');
@@ -380,18 +404,16 @@
     const elFloatingContainer = document.getElementById('floating-text-container');
     const elEffectC = document.getElementById('effect-c');
     
-    // Stats Elements
-    const elDispDecay = document.getElementById('disp-decay');
-    const elDiffDecay = document.getElementById('diff-decay');
+    // Stats
+    const elDispDecay = document.getElementById('disp-decay'), elDiffDecay = document.getElementById('diff-decay');
+    const elDispEnemy = document.getElementById('disp-enemy'), elDiffEnemy = document.getElementById('diff-enemy');
+    const elDispTarget = document.getElementById('disp-target'), elDiffTarget = document.getElementById('diff-target');
+    const elDispClick = document.getElementById('disp-click'), elDiffClick = document.getElementById('diff-click');
 
-    const elDispEnemy = document.getElementById('disp-enemy');
-    const elDiffEnemy = document.getElementById('diff-enemy');
-
-    const elDispTarget = document.getElementById('disp-target');
-    const elDiffTarget = document.getElementById('diff-target');
-
-    const elDispClick = document.getElementById('disp-click');
-    const elDiffClick = document.getElementById('diff-click');
+    btnIntroClose.addEventListener('click', () => {
+        elIntroModal.style.display = 'none';
+        state.isModalOpen = false;
+    });
 
     function getStageStats(stageLevel) {
         return {
@@ -404,7 +426,6 @@
 
     function updateStatsUI(prevStats = null) {
         const currStats = getStageStats(state.stage);
-
         elDispDecay.innerText = (currStats.decay / CONFIG.baseDecay).toFixed(2) + 'x';
         elDispEnemy.innerText = (currStats.enemySpeed / CONFIG.baseEnemySpeed).toFixed(2) + 'x';
         elDispTarget.innerText = (currStats.targetSpeed / CONFIG.targetMoveSpeed).toFixed(2) + 'x';
@@ -416,10 +437,7 @@
             showDiff(elDiffTarget, (currStats.targetSpeed - prevStats.targetSpeed) / CONFIG.targetMoveSpeed);
             showDiff(elDiffClick, (currStats.click - prevStats.click) / CONFIG.baseClick);
         } else {
-            [elDiffDecay, elDiffEnemy, elDiffTarget, elDiffClick].forEach(el => {
-                el.innerText = "";
-                el.style.opacity = 0;
-            });
+            [elDiffDecay, elDiffEnemy, elDiffTarget, elDiffClick].forEach(el => { el.innerText = ""; el.style.opacity = 0; });
         }
     }
 
@@ -428,7 +446,6 @@
         element.innerText = `+${val.toFixed(2)}`;
         element.style.transition = 'none'; 
         element.style.opacity = 1;
-        
         requestAnimationFrame(() => {
             requestAnimationFrame(() => {
                 element.style.transition = 'opacity 1.5s ease-in';
@@ -439,122 +456,70 @@
 
     function gameLoop(timestamp) {
         if (!state.isPlaying) return;
-
         const dt = (timestamp - state.lastTime) / 1000;
         state.lastTime = timestamp;
-
         const stats = getStageStats(state.stage);
 
-        if (state.gauge > 0) {
-            state.gauge -= stats.decay;
-            if (state.gauge < 0) state.gauge = 0;
-        }
+        if (state.gauge > 0) { state.gauge -= stats.decay; if (state.gauge < 0) state.gauge = 0; }
 
-        if (Math.abs(state.targetPos - state.targetDest) < 2) {
-            state.targetDest = Math.random() * 80 + 15; 
-        }
+        if (Math.abs(state.targetPos - state.targetDest) < 2) { state.targetDest = Math.random() * 80 + 15; }
         const direction = state.targetDest > state.targetPos ? 1 : -1;
         state.targetPos += direction * stats.targetSpeed;
 
         let diff = Math.abs(state.gauge - state.targetPos);
-        let rawEfficiency = 0;
-        let rawJudgment = "MISS";
+        let rawEfficiency = 0, rawJudgment = "MISS";
 
-        if (state.gauge < CONFIG.minActiveGauge) {
-            rawJudgment = "LOW";
-        } else {
-            if (diff < CONFIG.tolerance) {
-                rawJudgment = "PERFECT";
-                rawEfficiency = 1;
-            } else if (diff < 35) {
-                rawJudgment = "GOOD";
-                rawEfficiency = 1 - ((diff - CONFIG.tolerance) / (35 - CONFIG.tolerance));
-            } else {
-                rawJudgment = "MISS";
-                rawEfficiency = 0;
-            }
+        if (state.gauge < CONFIG.minActiveGauge) { rawJudgment = "LOW"; }
+        else {
+            if (diff < CONFIG.tolerance) { rawJudgment = "PERFECT"; rawEfficiency = 1; }
+            else if (diff < 35) { rawJudgment = "GOOD"; rawEfficiency = 1 - ((diff - CONFIG.tolerance) / (35 - CONFIG.tolerance)); }
+            else { rawJudgment = "MISS"; rawEfficiency = 0; }
         }
 
         let finalJudgment = rawJudgment;
-        if (rawJudgment === "PERFECT") {
-            state.graceTimer = CONFIG.gracePeriod;
-        } else if (state.graceTimer > 0) {
-            state.graceTimer -= dt;
-            finalJudgment = "PERFECT";
-            rawEfficiency = 1; 
-        }
+        if (rawJudgment === "PERFECT") { state.graceTimer = CONFIG.gracePeriod; }
+        else if (state.graceTimer > 0) { state.graceTimer -= dt; finalJudgment = "PERFECT"; rawEfficiency = 1; }
 
-        let displayText = "";
-        let textGlow = ""; 
-        let moveAmount = 0;
-        let bgClass = "bg-normal";
-        let effectAlpha = 0.2;
+        let displayText = "", textGlow = "", moveAmount = 0, bgClass = "bg-normal", effectAlpha = 0.2;
 
         if (finalJudgment === "LOW") {
-            displayText = "LOW";
-            textGlow = "0 0 10px #888"; 
-            moveAmount = stats.enemySpeed;
-            state.perfectDuration = 0;
-            bgClass = "bg-miss";
+            displayText = "LOW"; textGlow = "0 0 10px #888"; 
+            moveAmount = stats.enemySpeed; state.perfectDuration = 0; bgClass = "bg-miss";
         } else if (finalJudgment === "PERFECT") {
             state.perfectDuration += dt;
             let currentPullSpeed = CONFIG.perfectPullSpeed;
-
             if (state.perfectDuration >= CONFIG.sustainThreshold) {
                 const extraTime = state.perfectDuration - CONFIG.sustainThreshold;
                 const extraSteps = Math.floor(extraTime / CONFIG.sustainInterval);
                 const multiplier = CONFIG.sustainBaseMult + (extraSteps * CONFIG.sustainIncMult);
                 currentPullSpeed *= multiplier;
-
                 displayText = `MAX x${multiplier.toFixed(2)}`;
-                textGlow = "0 0 15px #00e5ff, 0 0 30px #00e5ff"; 
-                bgClass = "bg-bonus";
-                effectAlpha = 0.9;
+                textGlow = "0 0 15px #00e5ff, 0 0 30px #00e5ff"; bgClass = "bg-bonus"; effectAlpha = 0.9;
             } else {
-                displayText = "PERFECT";
-                textGlow = "0 0 10px #4caf50, 0 0 20px #4caf50"; 
-                bgClass = "bg-perfect";
-                effectAlpha = 0.7;
+                displayText = "PERFECT"; textGlow = "0 0 10px #4caf50, 0 0 20px #4caf50"; 
+                bgClass = "bg-perfect"; effectAlpha = 0.7;
             }
             moveAmount = -currentPullSpeed;
-
         } else if (finalJudgment === "GOOD") {
-            state.perfectDuration = 0;
-            displayText = "GOOD";
-            textGlow = "0 0 10px #ffeb3b, 0 0 20px #ffeb3b"; 
-            const playerForce = CONFIG.pullPower * rawEfficiency;
-            moveAmount = stats.enemySpeed - playerForce;
-            bgClass = "bg-good";
-            effectAlpha = 0.2 + (rawEfficiency * 0.5);
-
+            state.perfectDuration = 0; displayText = "GOOD"; textGlow = "0 0 10px #ffeb3b, 0 0 20px #ffeb3b"; 
+            moveAmount = stats.enemySpeed - (CONFIG.pullPower * rawEfficiency);
+            bgClass = "bg-good"; effectAlpha = 0.2 + (rawEfficiency * 0.5);
         } else {
-            state.perfectDuration = 0;
-            displayText = "MISS";
-            textGlow = "0 0 10px #f44336, 0 0 20px #f44336"; 
-            moveAmount = stats.enemySpeed;
-            bgClass = "bg-miss";
-            effectAlpha = 0.2;
+            state.perfectDuration = 0; displayText = "MISS"; textGlow = "0 0 10px #f44336, 0 0 20px #f44336"; 
+            moveAmount = stats.enemySpeed; bgClass = "bg-miss"; effectAlpha = 0.2;
         }
 
-        elAccuracyText.innerText = displayText;
-        elAccuracyText.style.textShadow = textGlow;
-        elBgOverlay.className = bgClass; 
-        elEffectC.style.opacity = effectAlpha;
-
+        elAccuracyText.innerText = displayText; elAccuracyText.style.textShadow = textGlow;
+        elBgOverlay.className = bgClass; elEffectC.style.opacity = effectAlpha;
         state.posA += moveAmount;
 
         if (state.posA <= 0) winStage();
         else if (state.posA >= 100) gameOver();
-        else {
-            render();
-            state.animationId = requestAnimationFrame(gameLoop);
-        }
+        else { render(); state.animationId = requestAnimationFrame(gameLoop); }
     }
 
     function render() {
-        let visualPos = state.posA;
-        if(visualPos < 0) visualPos = 0;
-        if(visualPos > 100) visualPos = 100;
+        let visualPos = state.posA < 0 ? 0 : (state.posA > 100 ? 100 : state.posA);
         elPlayerA.style.left = `${visualPos}%`;
         elGaugeFill.style.width = `${state.gauge}%`;
         elTargetLine.style.left = `${state.targetPos}%`;
@@ -562,85 +527,50 @@
 
     function increaseGauge() {
         if (!state.isPlaying) return;
-        const stats = getStageStats(state.stage);
-        state.gauge += stats.click;
+        state.gauge += getStageStats(state.stage).click;
         if (state.gauge > 100) state.gauge = 100;
         elGaugeFill.style.filter = "brightness(1.5)";
         setTimeout(() => elGaugeFill.style.filter = "brightness(1)", 50);
     }
 
     function startGame() {
-        state.isPlaying = true;
-        state.posA = 50;
-        state.gauge = 0;
-        state.stage = 1; 
-        state.targetPos = 50;
-        state.targetDest = 60;
-        state.lastTime = performance.now(); 
-        state.perfectDuration = 0; 
-        state.graceTimer = 0;
-
-        elStageInfo.innerText = "STAGE 1";
-        elFloatingContainer.innerHTML = ''; 
-        elAccuracyText.innerText = "START";
-        elAccuracyText.style.textShadow = "none";
-        
-        elFlashLayer.className = "";
-        elBgOverlay.className = "bg-normal";
-        updateStatsUI(null); 
-
+        state.isPlaying = true; state.posA = 50; state.gauge = 0; state.stage = 1;
+        state.targetPos = 50; state.targetDest = 60; state.lastTime = performance.now();
+        state.perfectDuration = 0; state.graceTimer = 0;
+        elStageInfo.innerText = "STAGE 1"; elFloatingContainer.innerHTML = '';
+        elAccuracyText.innerText = "START"; elAccuracyText.style.textShadow = "none";
+        elFlashLayer.className = ""; elBgOverlay.className = "bg-normal";
+        updateStatsUI(null);
         state.animationId = requestAnimationFrame(gameLoop);
     }
 
     function showFloatingText(currStats) {
         elFloatingContainer.innerHTML = ''; 
-        const enemyRate = (currStats.enemySpeed / CONFIG.baseEnemySpeed).toFixed(2);
-        
         const div = document.createElement('div');
         div.className = 'hit-text';
-        div.innerText = `속도 ${enemyRate}x`;
+        div.innerText = `속도 ${(currStats.enemySpeed / CONFIG.baseEnemySpeed).toFixed(2)}x`;
         elFloatingContainer.appendChild(div);
     }
 
     function winStage() {
         cancelAnimationFrame(state.animationId);
-
-        const prevStats = getStageStats(state.stage);
-        state.stage++;
-        const currStats = getStageStats(state.stage);
-        
-        showFloatingText(currStats); 
-        updateStatsUI(prevStats); 
-
+        const prevStats = getStageStats(state.stage); state.stage++;
+        showFloatingText(getStageStats(state.stage)); updateStatsUI(prevStats);
         elStageInfo.innerText = `STAGE ${state.stage}`;
-
-        elFlashLayer.className = ""; 
-        void elFlashLayer.offsetWidth; 
-        elFlashLayer.classList.add("flash-white");
-        
+        elFlashLayer.className = ""; void elFlashLayer.offsetWidth; elFlashLayer.classList.add("flash-white");
         elBgOverlay.className = "bg-normal";
-
-        state.posA = 50; 
-        state.gauge = 0;
-        state.perfectDuration = 0;
-        state.lastTime = performance.now();
-
+        state.posA = 50; state.gauge = 0; state.perfectDuration = 0; state.lastTime = performance.now();
         render();
         state.animationId = requestAnimationFrame(gameLoop);
     }
 
     function gameOver() {
-        state.isPlaying = false;
-        state.isRestartLocked = true; 
-        cancelAnimationFrame(state.animationId);
-
-        elFloatingContainer.innerHTML = '';
-        elAccuracyText.innerText = ""; 
-
+        state.isPlaying = false; state.isRestartLocked = true; cancelAnimationFrame(state.animationId);
+        elFloatingContainer.innerHTML = ''; elAccuracyText.innerText = "";
+        
         const titleDiv = document.createElement('div');
-        titleDiv.className = 'game-over-title';
-        titleDiv.innerText = 'GAME OVER';
-        elFloatingContainer.appendChild(titleDiv); 
+        titleDiv.className = 'game-over-title'; titleDiv.innerText = 'GAME OVER';
+        elFloatingContainer.appendChild(titleDiv);
 
         const savedMax = localStorage.getItem('ptw_max_stage') || 1;
         const maxStage = Math.max(state.stage, parseInt(savedMax));
@@ -651,56 +581,28 @@
         subDiv.innerHTML = `현재 기록: STAGE ${state.stage}<br>최고 기록: STAGE ${maxStage}`;
         document.getElementById('game-container').appendChild(subDiv);
 
-        elFlashLayer.className = "";
-        void elFlashLayer.offsetWidth;
-        elFlashLayer.classList.add("flash-red");
-        
-        btnAction.innerText = "WAIT...";
-        btnAction.classList.add("locked");
-
-        setTimeout(() => {
-            state.isRestartLocked = false;
-            btnAction.innerText = "RESTART";
-            btnAction.classList.remove("locked");
-        }, 2000);
+        elFlashLayer.className = ""; void elFlashLayer.offsetWidth; elFlashLayer.classList.add("flash-red");
+        btnAction.innerText = "WAIT..."; btnAction.classList.add("locked");
+        setTimeout(() => { state.isRestartLocked = false; btnAction.innerText = "RESTART"; btnAction.classList.remove("locked"); }, 2000);
     }
 
     function clearGameOverUI() {
-        const sub = document.querySelector('.game-over-sub');
-        if(sub) sub.remove();
+        const sub = document.querySelector('.game-over-sub'); if(sub) sub.remove();
     }
-
-    btnAction.addEventListener('mousedown', (e) => {
-        e.stopPropagation();
-        handleInput();
-    });
-    btnAction.addEventListener('touchstart', (e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        handleInput();
-    });
-
-    window.addEventListener('keydown', (e) => {
-        if (e.code === 'Space') {
-            handleInput();
-        }
-    });
 
     function handleInput() {
+        if (state.isModalOpen) return;
         if (!state.isPlaying) {
-            if (state.isRestartLocked) return; 
-            clearGameOverUI();
-            startGame();
-            // [수정] 게임 중 텍스트 SPACE!
-            btnAction.innerText = "SPACE!";
-        } else {
-            increaseGauge();
-        }
+            if (state.isRestartLocked) return;
+            clearGameOverUI(); startGame(); btnAction.innerText = "SPACE!";
+        } else { increaseGauge(); }
     }
 
-    updateStatsUI(null);
-    render();
+    btnAction.addEventListener('mousedown', (e) => { e.stopPropagation(); handleInput(); });
+    btnAction.addEventListener('touchstart', (e) => { e.stopPropagation(); e.preventDefault(); handleInput(); });
+    window.addEventListener('keydown', (e) => { if (e.code === 'Space') handleInput(); });
 
+    updateStatsUI(null); render();
 </script>
 </body>
 </html>
