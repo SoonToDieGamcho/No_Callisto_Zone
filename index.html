@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Fan Game Prototype</title>
+    <title>Fan Game Final Rev2</title>
     <style>
-        /* 폰트 정의 */
         @font-face {
             font-family: 'Escoredream';
             src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/S-CoreDream-5Medium.woff') format('woff');
@@ -22,42 +21,62 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            /* 2. 전체 뒷배경 이미지 */
             background: url('images/bg.png') no-repeat center center;
             background-size: cover;
-            /* 7. 모바일 더블탭 확대 방지 */
             touch-action: manipulation; 
         }
 
-        /* 1. 게임 박스 (메인 컨테이너) */
-        #game-container {
-            width: 800px;
-            height: 500px; /* 박스 이미지 비율에 맞춰 조정 필요 */
-            position: relative;
-            /* 이미지로 대체 */
-            background: url('images/box.png') no-repeat center center;
-            background-size: 100% 100%; 
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-            display: flex;
-            flex-direction: column;
-            justify-content: center; /* 내부 요소 수직 중앙 정렬 */
-            align-items: center;
-        }
-
-        /* 6. 배경 색상 오버레이 (박스 내부 틴트용) */
-        #color-overlay {
+        /* 배경 색상 오버레이 */
+        #bg-overlay {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            border-radius: 15px; /* 박스 모서리에 맞춤 */
             pointer-events: none;
-            z-index: 1; /* 배경(0) 위, 트랙(2) 아래 */
-            transition: background-color 0.1s, opacity 0.1s;
+            z-index: 1; 
         }
 
-        /* 스테이지 정보 (상단 중앙) */
+        /* 배경 상태 클래스 (하늘색 계열 통일, 알파값 구분) */
+        .bg-normal { background-color: transparent; }
+        .bg-good { background-color: #3DFFEA; opacity: 0.2; }
+        .bg-perfect { background-color: #3DFFEA; opacity: 0.4; }
+        .bg-bonus { background-color: #63F2FF; opacity: 0.6; }
+        .bg-miss { background-color: #3DFFEA; opacity: 0.05; }
+
+        /* 화이트 플래시 (클리어) */
+        .flash-effect {
+            animation: flash-bg 0.3s ease-out;
+        }
+        @keyframes flash-bg {
+            0% { background-color: #fff; }
+            50% { background-color: #888; }
+            100% { background-color: transparent; } 
+        }
+
+        /* 레드 플래시 (게임오버) */
+        .flash-fail {
+            animation: flash-fail-bg 0.5s ease-out;
+        }
+        @keyframes flash-fail-bg {
+            0% { background-color: #ff0000; }
+            100% { background-color: transparent; }
+        }
+
+        #game-container {
+            width: 800px;
+            height: 500px;
+            position: relative;
+            background: url('images/box.png') no-repeat center center;
+            background-size: 100% 100%; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden; 
+        }
+
         #stage-info {
             position: absolute;
             top: 20px;
@@ -70,70 +89,63 @@
             z-index: 10;
         }
 
-        /* 3. 경로 (트랙) - 반투명 */
         .field-track {
             position: relative;
             width: 90%;
             height: 80px;
-            /* 반투명 검정으로 뒤쪽 box.png가 은은하게 비침 */
             background: rgba(0, 0, 0, 0.3); 
             border: 2px solid rgba(255, 255, 255, 0.2);
             border-radius: 40px;
-            margin-bottom: 30px; /* 게이지바와의 간격 */
-            overflow: visible; /* 이미지가 튀어나와도 보이게 */
-            z-index: 5; /* 오버레이 위 */
+            margin-bottom: 20px; 
+            overflow: visible; 
+            z-index: 5; 
         }
 
-        /* 4. 캐릭터 및 지점 이미지화 */
         .obj-image {
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
-            z-index: 20; /* 최상단 */
+            z-index: 20;
         }
 
-        /* C (Goal) */
         #img-c {
-            left: -20px; /* 트랙 밖으로 살짝 뺌 */
+            left: -20px; 
             width: 100px; 
             height: auto;
         }
 
-        /* 8. C 배경 이펙트 */
+        /* 3. C 이펙트 크기 240% 확대 */
         #effect-c {
             position: absolute;
-            left: -50px; /* C 뒤쪽 */
+            left: -50px;
             top: 50%;
-            transform: translateY(-50%);
+            /* 기존 중앙 정렬 + 2.4배 확대 적용 */
+            transform: translateY(-50%) scale(2.4);
             width: 160px;
             height: 160px;
             background: url('images/ef.png') no-repeat center center;
             background-size: contain;
-            z-index: 15; /* C(20)보다 아래, 트랙(5)보다 위 */
-            opacity: 0.2; /* 초기값 */
+            z-index: 15;
+            opacity: 0.2;
             transition: opacity 0.1s;
             pointer-events: none;
         }
 
-        /* B (Start/Death) */
         #img-b {
             right: -20px;
             width: 80px;
             height: auto;
         }
 
-        /* A (Player) - 움직임 */
         #player-a {
-            /* left값은 JS로 제어 */
-            width: 70px; 
+            width: 110px; 
             height: auto;
             top: 50%;
-            transform: translate(-50%, -50%); /* 중심점 기준 이동 */
-            z-index: 30; /* 제일 위 */
+            transform: translate(-50%, -50%);
+            z-index: 30;
             transition: left 0.1s linear;
         }
 
-        /* 게이지바 컨테이너 */
         .gauge-container {
             position: relative;
             width: 70%;
@@ -143,6 +155,7 @@
             border: 1px solid rgba(255,255,255,0.3);
             overflow: hidden;
             z-index: 10;
+            margin-bottom: 20px; 
         }
 
         #gauge-fill {
@@ -164,7 +177,6 @@
             z-index: 5;
         }
 
-        /* 5. 스탯 표시 (좌측 하단 구석) */
         #stats-corner {
             position: absolute;
             bottom: 15px;
@@ -174,71 +186,101 @@
             font-size: 12px;
             color: rgba(255, 255, 255, 0.7);
             line-height: 1.4;
-            /* 검은 박스 제거됨 */
         }
         
         .stat-val { color: #fff; font-weight: bold; }
 
-        /* 판정 텍스트 (게이지바 위) */
         #accuracy-text {
             height: 24px;
             margin-bottom: 5px;
             font-size: 20px;
             font-weight: bold;
-            color: #fff;
-            text-shadow: 0 0 5px #3DFFEA;
+            color: #aaa; 
+            text-shadow: 1px 1px 2px black;
             z-index: 10;
         }
 
-        /* 히트 텍스트 등 UI */
+        /* 상단 부유 텍스트 컨테이너 (히트 텍스트 및 게임오버) */
         #floating-text-container {
             position: absolute;
-            top: 20%;
+            top: 100px; /* 위치 조정 */
+            left: 50%;
+            transform: translateX(-50%);
             width: 100%;
-            text-align: center;
             pointer-events: none;
             z-index: 50;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         
+        /* 히트 텍스트 애니메이션 */
         .hit-text {
             font-size: 18px;
             font-weight: bold;
-            color: #fff;
-            text-shadow: 0 0 5px #3DFFEA;
-            animation: floatUp 1s forwards;
-        }
-        
-        @keyframes floatUp {
-            to { opacity: 0; transform: translateY(-30px); }
+            margin-bottom: 5px;
+            animation: floatUpFade 2.0s ease-out forwards;
+            text-shadow: 1px 1px 2px black;
         }
 
-        /* 전체 클릭 영역 (버튼 대체) */
-        #click-layer {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 999;
-            cursor: pointer;
-            /* 모바일 탭 하이라이트 제거 */
-            -webkit-tap-highlight-color: transparent;
+        /* 1. 게임 오버 텍스트 스타일 복구 */
+        .game-over-title {
+            font-size: 60px;
+            font-weight: 900;
+            color: #ff3333; /* 빨간색 */
+            text-shadow: 3px 3px 0 #fff, 0 0 20px #ff0000;
+            margin-bottom: 10px;
         }
+        .game-over-sub {
+            font-size: 24px;
+            color: #fff;
+            text-shadow: 1px 1px 5px black;
+            margin-bottom: 15px;
+        }
+        
+        .stat-bad { color: #ff5252; }   
+        .stat-good { color: #4caf50; }  
+
+        @keyframes floatUpFade {
+            0% { opacity: 0; transform: translateY(20px); }
+            10% { opacity: 1; transform: translateY(0); }
+            80% { opacity: 1; transform: translateY(-30px); }
+            100% { opacity: 0; transform: translateY(-50px); }
+        }
+
+        #action-btn {
+            padding: 15px 40px;
+            font-size: 20px;
+            background: #ff5722;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #bf360c;
+            font-family: 'Escoredream', sans-serif;
+            z-index: 50; 
+            margin-top: 10px;
+        }
+        #action-btn:active {
+            box-shadow: 0 2px 0 #bf360c;
+            transform: translateY(3px);
+        }
+
     </style>
 </head>
 <body>
 
-<div id="click-layer"></div> <div id="game-container">
-    <div id="color-overlay"></div>
+<div id="game-container">
+    <div id="bg-overlay"></div>
 
     <div id="stage-info">STAGE 1</div>
     <div id="floating-text-container"></div>
     
     <div id="stats-corner">
-        <div>감소: <span id="disp-decay" class="stat-val">1.0x</span></div>
-        <div>방해: <span id="disp-enemy" class="stat-val">1.0x</span></div>
-        <div>판정: <span id="disp-target" class="stat-val">1.0x</span></div>
-        <div>파워: <span id="disp-click" class="stat-val">1.0x</span></div>
+        <div>게이지 감소량: <span id="disp-decay" class="stat-val">1.0x</span></div>
+        <div>방해하는 힘: <span id="disp-enemy" class="stat-val">1.0x</span></div>
+        <div>판정선 속도: <span id="disp-target" class="stat-val">1.0x</span></div>
+        <div>클릭 파워: <span id="disp-click" class="stat-val">1.0x</span></div>
     </div>
 
     <div id="accuracy-text">READY</div>
@@ -254,6 +296,8 @@
         <div id="gauge-fill"></div>
         <div id="target-line"></div>
     </div>
+
+    <button id="action-btn">MASH! (SPACE)</button>
 </div>
 
 <script>
@@ -292,18 +336,17 @@
         graceTimer: 0 
     };
 
-    // DOM Elements
-    const elOverlay = document.getElementById('color-overlay');
+    const elBody = document.body;
+    const elBgOverlay = document.getElementById('bg-overlay');
     const elPlayerA = document.getElementById('player-a');
     const elGaugeFill = document.getElementById('gauge-fill');
     const elTargetLine = document.getElementById('target-line');
     const elStageInfo = document.getElementById('stage-info');
     const elAccuracyText = document.getElementById('accuracy-text');
-    const elEffectC = document.getElementById('effect-c');
+    const btnAction = document.getElementById('action-btn');
     const elFloatingContainer = document.getElementById('floating-text-container');
-    const elClickLayer = document.getElementById('click-layer');
+    const elEffectC = document.getElementById('effect-c');
     
-    // Stats Elements
     const elDispDecay = document.getElementById('disp-decay');
     const elDispEnemy = document.getElementById('disp-enemy');
     const elDispTarget = document.getElementById('disp-target');
@@ -334,20 +377,20 @@
 
         const stats = getStageStats(state.stage);
 
-        // 1. 게이지 감소
+        // 게이지
         if (state.gauge > 0) {
             state.gauge -= stats.decay;
             if (state.gauge < 0) state.gauge = 0;
         }
 
-        // 2. 판정선 이동
+        // 판정선
         if (Math.abs(state.targetPos - state.targetDest) < 2) {
             state.targetDest = Math.random() * 80 + 15; 
         }
         const direction = state.targetDest > state.targetPos ? 1 : -1;
         state.targetPos += direction * stats.targetSpeed;
 
-        // 3. 판정 계산
+        // 판정 계산
         let diff = Math.abs(state.gauge - state.targetPos);
         let rawEfficiency = 0;
         let rawJudgment = "MISS";
@@ -367,100 +410,77 @@
             }
         }
 
-        // 4. 보정 (Grace Period)
+        // 보정 로직
         let finalJudgment = rawJudgment;
         if (rawJudgment === "PERFECT") {
             state.graceTimer = CONFIG.gracePeriod;
         } else if (state.graceTimer > 0) {
             state.graceTimer -= dt;
             finalJudgment = "PERFECT";
-            rawEfficiency = 1; // 보정 시 효율 100%
+            rawEfficiency = 1; 
         }
 
-        // 5. 로직 및 렌더링 값 설정
+        // 결과 반영
         let displayText = "";
+        let displayColor = "#aaa";
         let moveAmount = 0;
-        let overlayColor = "transparent";
-        let overlayAlpha = 0;
-        let effectAlpha = 0.2; // 기본 20%
+        let bgClass = "bg-normal";
+        let effectAlpha = 0.2;
 
         if (finalJudgment === "LOW") {
             displayText = "LOW";
-            const playerForce = 0;
-            moveAmount = stats.enemySpeed - playerForce;
+            displayColor = "#888"; 
+            moveAmount = stats.enemySpeed;
             state.perfectDuration = 0;
-            
-            // 색상 없음
-            overlayAlpha = 0;
+            bgClass = "bg-miss";
 
         } else if (finalJudgment === "PERFECT") {
             state.perfectDuration += dt;
             let currentPullSpeed = CONFIG.perfectPullSpeed;
 
-            // 보너스
             if (state.perfectDuration >= CONFIG.sustainThreshold) {
-                // [보너스 모드] #63F2FF, 진하게
                 const extraTime = state.perfectDuration - CONFIG.sustainThreshold;
                 const extraSteps = Math.floor(extraTime / CONFIG.sustainInterval);
                 const multiplier = CONFIG.sustainBaseMult + (extraSteps * CONFIG.sustainIncMult);
                 currentPullSpeed *= multiplier;
 
                 displayText = `MAX x${multiplier.toFixed(2)}`;
-                
-                // 보너스 색상 (진한 하늘색)
-                overlayColor = "#63F2FF";
-                overlayAlpha = 0.6; // 매우 진함
-                effectAlpha = 0.9; // 이펙트 거의 불투명
+                displayColor = "#00e5ff"; 
+                bgClass = "bg-bonus";
+                effectAlpha = 0.9;
             } else {
-                // [일반 퍼펙트] #3DFFEA
                 displayText = "PERFECT";
-                overlayColor = "#3DFFEA";
-                overlayAlpha = 0.4; // 중간 진함
-                effectAlpha = 0.7; // 이펙트 70%
+                displayColor = "#4caf50"; 
+                bgClass = "bg-perfect";
+                effectAlpha = 0.7;
             }
             moveAmount = -currentPullSpeed;
 
         } else if (finalJudgment === "GOOD") {
             state.perfectDuration = 0;
             displayText = "GOOD";
+            displayColor = "#ffeb3b"; 
             const playerForce = CONFIG.pullPower * rawEfficiency;
             moveAmount = stats.enemySpeed - playerForce;
-            
-            // [Good] #3DFFEA, 연하게
-            overlayColor = "#3DFFEA";
-            overlayAlpha = 0.2; 
-            // 효율에 따라 이펙트 20%~70% 보간
+            bgClass = "bg-good";
             effectAlpha = 0.2 + (rawEfficiency * 0.5);
 
         } else { // MISS
             state.perfectDuration = 0;
             displayText = "MISS";
+            displayColor = "#f44336"; 
             moveAmount = stats.enemySpeed;
-            
-            // [Miss] #3DFFEA, 아주 연하게
-            overlayColor = "#3DFFEA";
-            overlayAlpha = 0.05; 
+            bgClass = "bg-miss";
             effectAlpha = 0.2;
         }
 
-        // 6. UI 및 DOM 업데이트
         elAccuracyText.innerText = displayText;
-        
-        // 6-1. 색상 오버레이 업데이트
-        if(overlayAlpha > 0) {
-            // hex -> rgba 변환 (간단히 opacity로 처리)
-            elOverlay.style.backgroundColor = overlayColor;
-            elOverlay.style.opacity = overlayAlpha;
-        } else {
-            elOverlay.style.opacity = 0;
-        }
-
-        // 8. C 이펙트 알파값 업데이트
+        elAccuracyText.style.color = displayColor;
+        elBgOverlay.className = bgClass; 
         elEffectC.style.opacity = effectAlpha;
 
         state.posA += moveAmount;
 
-        // 결과 처리
         if (state.posA <= 0) winStage();
         else if (state.posA >= 100) gameOver();
         else {
@@ -474,22 +494,16 @@
         if(visualPos < 0) visualPos = 0;
         if(visualPos > 100) visualPos = 100;
 
-        // A 이미지 이동
         elPlayerA.style.left = `${visualPos}%`;
-        
-        // 게이지 바
         elGaugeFill.style.width = `${state.gauge}%`;
         elTargetLine.style.left = `${state.targetPos}%`;
     }
 
     function increaseGauge() {
         if (!state.isPlaying) return;
-        
         const stats = getStageStats(state.stage);
         state.gauge += stats.click;
         if (state.gauge > 100) state.gauge = 100;
-        
-        // 게이지 찰 때 잠깐 밝게
         elGaugeFill.style.filter = "brightness(1.5)";
         setTimeout(() => elGaugeFill.style.filter = "brightness(1)", 50);
     }
@@ -509,56 +523,101 @@
         elFloatingContainer.innerHTML = ''; 
         elAccuracyText.innerText = "START";
         updateStatsUI();
+        
+        elBody.classList.remove('flash-fail');
+        elBody.classList.remove('flash-effect');
+        elBgOverlay.className = "bg-normal";
 
         state.animationId = requestAnimationFrame(gameLoop);
     }
 
+    // 2. 한글 히트 텍스트 확인 완료
+    function showFloatingText(prevStats, currStats) {
+        elFloatingContainer.innerHTML = ''; 
+
+        const decayRate = (currStats.decay / prevStats.decay).toFixed(2);
+        createHitElement(`게이지 감소량: x${decayRate}`, "stat-bad");
+
+        const enemyRate = (currStats.enemySpeed / prevStats.enemySpeed).toFixed(2);
+        createHitElement(`방해하는 힘: x${enemyRate}`, "stat-bad");
+        
+        const targetRate = (currStats.targetSpeed / prevStats.targetSpeed).toFixed(2);
+        createHitElement(`판정선 속도: x${targetRate}`, "stat-bad");
+
+        const clickRate = (currStats.click / prevStats.click).toFixed(2);
+        createHitElement(`클릭 파워: x${clickRate}`, "stat-good");
+    }
+
+    function createHitElement(text, className) {
+        const div = document.createElement('div');
+        div.className = `hit-text ${className}`;
+        div.innerText = text;
+        elFloatingContainer.appendChild(div);
+    }
+
     function winStage() {
         cancelAnimationFrame(state.animationId);
+
+        const prevStats = getStageStats(state.stage);
         state.stage++;
-        
-        // 히트 텍스트 (다음 스테이지)
-        const div = document.createElement('div');
-        div.className = 'hit-text';
-        div.innerText = `STAGE ${state.stage}`;
-        elFloatingContainer.appendChild(div);
-        setTimeout(()=> div.remove(), 1000);
+        const currStats = getStageStats(state.stage);
+        showFloatingText(prevStats, currStats);
 
         elStageInfo.innerText = `STAGE ${state.stage}`;
         updateStatsUI();
+
+        elBody.classList.remove('flash-fail');
+        elBody.classList.remove('flash-effect');
+        void elBody.offsetWidth;
+        elBody.classList.add('flash-effect');
         
-        // 리셋
+        elBgOverlay.className = "bg-normal";
+
         state.posA = 50; 
         state.gauge = 0;
         state.perfectDuration = 0;
         state.lastTime = performance.now();
 
+        render();
         state.animationId = requestAnimationFrame(gameLoop);
     }
 
+    // 1. 게임 오버 UI 복구
     function gameOver() {
         state.isPlaying = false;
         cancelAnimationFrame(state.animationId);
 
         elFloatingContainer.innerHTML = '';
-        elAccuracyText.innerText = "GAME OVER";
+        // 판정 텍스트는 숨김 처리
+        elAccuracyText.innerText = "";
+
+        // 큰 게임오버 타이틀 생성
+        const titleDiv = document.createElement('div');
+        titleDiv.className = 'game-over-title';
+        titleDiv.innerText = 'GAME OVER';
         
-        // 간단한 재시작 안내
-        const div = document.createElement('div');
-        div.className = 'hit-text';
-        div.innerText = "TAP TO RESTART";
-        div.style.color = "#ff3333";
-        elFloatingContainer.appendChild(div);
+        const subDiv = document.createElement('div');
+        subDiv.className = 'game-over-sub';
+        subDiv.innerText = `기록: STAGE ${state.stage}`;
+
+        elFloatingContainer.appendChild(titleDiv);
+        elFloatingContainer.appendChild(subDiv);
+
+        elBody.classList.remove('flash-effect');
+        elBody.classList.remove('flash-fail');
+        void elBody.offsetWidth;
+        elBody.classList.add('flash-fail');
+        
+        btnAction.innerText = "RESTART";
     }
 
-    // 입력 핸들러 (연타)
-    // 7. 모바일 더블탭 문제 해결 -> clickLayer에 이벤트 위임
-    elClickLayer.addEventListener('mousedown', (e) => {
-        e.preventDefault();
+    btnAction.addEventListener('mousedown', (e) => {
+        e.stopPropagation();
         handleInput();
     });
-    elClickLayer.addEventListener('touchstart', (e) => {
-        e.preventDefault(); // 더블탭 확대 방지 핵심
+    btnAction.addEventListener('touchstart', (e) => {
+        e.stopPropagation();
+        e.preventDefault();
         handleInput();
     });
 
@@ -571,12 +630,12 @@
     function handleInput() {
         if (!state.isPlaying) {
             startGame();
+            btnAction.innerText = "MASH!";
         } else {
             increaseGauge();
         }
     }
 
-    // 초기화
     updateStatsUI();
     render();
 
