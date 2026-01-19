@@ -56,7 +56,6 @@
         }
 
         .intro-content p { margin-bottom: 20px; font-size: 18px; }
-        
         .highlight-blue { color: #3DFFEA; font-weight: bold; }
         .highlight-perfect { text-shadow: 0 0 10px #4caf50; font-weight: bold; color: #fff; }
         .highlight-max { text-shadow: 0 0 15px #3DFFEA, 0 0 30px #3DFFEA; font-weight: bold; color: #fff; }
@@ -94,7 +93,6 @@
         .flash-red { animation: flash-r 0.6s ease-out; }
         @keyframes flash-r { 0% { background-color: red; opacity: 0.6; } 100% { background-color: red; opacity: 0; } }
 
-        /* 배경 틴트 */
         #bg-overlay {
             position: absolute;
             top: 0;
@@ -162,6 +160,7 @@
             100% { opacity: 0; transform: translateY(-20px); }
         }
 
+        /* 판정 텍스트 (기록 표시 겸용) */
         #accuracy-text {
             height: 30px;
             font-size: 24px;
@@ -169,6 +168,7 @@
             color: #fff; 
             z-index: 10;
             margin-bottom: 20px; 
+            white-space: nowrap; /* 줄바꿈 방지 */
         }
 
         .field-track {
@@ -301,10 +301,9 @@
             cursor: not-allowed;
         }
 
-        /* 게임오버 관련 스타일 */
         .game-over-title {
             position: absolute; 
-            top: 40%; /* 화면 상단 40% 위치 */
+            top: 40%;
             left: 50%;
             transform: translate(-50%, -50%);
             font-size: 60px;
@@ -314,20 +313,6 @@
             z-index: 100;
             width: 100%;
             text-align: center;
-        }
-
-        /* 기록 텍스트: 48% 위치로 설정하여 제목 바로 밑에 붙음 */
-        .game-over-sub {
-            position: absolute;
-            top: 48%; 
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 18px;
-            color: #fff;
-            text-shadow: 1px 1px 2px black;
-            z-index: 100;
-            text-align: center;
-            line-height: 1.5;
         }
     </style>
 </head>
@@ -537,8 +522,14 @@
         state.isPlaying = true; state.posA = 50; state.gauge = 0; state.stage = 1;
         state.targetPos = 50; state.targetDest = 60; state.lastTime = performance.now();
         state.perfectDuration = 0; state.graceTimer = 0;
+        
         elStageInfo.innerText = "STAGE 1"; elFloatingContainer.innerHTML = '';
-        elAccuracyText.innerText = "START"; elAccuracyText.style.textShadow = "none";
+        
+        // 텍스트 및 스타일 리셋
+        elAccuracyText.innerText = "START"; 
+        elAccuracyText.style.fontSize = "24px"; // 폰트 크기 원복
+        elAccuracyText.style.textShadow = "none";
+        
         elFlashLayer.className = ""; elBgOverlay.className = "bg-normal";
         updateStatsUI(null);
         state.animationId = requestAnimationFrame(gameLoop);
@@ -566,8 +557,11 @@
 
     function gameOver() {
         state.isPlaying = false; state.isRestartLocked = true; cancelAnimationFrame(state.animationId);
-        elFloatingContainer.innerHTML = ''; elAccuracyText.innerText = "";
         
+        // 상단 부유 텍스트 제거
+        elFloatingContainer.innerHTML = ''; 
+
+        // 게임오버 타이틀
         const titleDiv = document.createElement('div');
         titleDiv.className = 'game-over-title'; titleDiv.innerText = 'GAME OVER';
         elFloatingContainer.appendChild(titleDiv);
@@ -576,25 +570,22 @@
         const maxStage = Math.max(state.stage, parseInt(savedMax));
         localStorage.setItem('ptw_max_stage', maxStage);
 
-        const subDiv = document.createElement('div');
-        subDiv.className = 'game-over-sub';
-        subDiv.innerHTML = `현재 기록: STAGE ${state.stage}<br>최고 기록: STAGE ${maxStage}`;
-        document.getElementById('game-container').appendChild(subDiv);
+        // [수정] 기록 텍스트를 판정 텍스트 칸에 주입
+        elAccuracyText.innerHTML = `기록: STAGE ${state.stage} &nbsp;|&nbsp; 최고: STAGE ${maxStage}`;
+        elAccuracyText.style.fontSize = "16px"; // 공간에 맞게 폰트 조절
+        elAccuracyText.style.textShadow = "none";
+        elAccuracyText.style.color = "#fff";
 
         elFlashLayer.className = ""; void elFlashLayer.offsetWidth; elFlashLayer.classList.add("flash-red");
         btnAction.innerText = "WAIT..."; btnAction.classList.add("locked");
         setTimeout(() => { state.isRestartLocked = false; btnAction.innerText = "RESTART"; btnAction.classList.remove("locked"); }, 2000);
     }
 
-    function clearGameOverUI() {
-        const sub = document.querySelector('.game-over-sub'); if(sub) sub.remove();
-    }
-
     function handleInput() {
         if (state.isModalOpen) return;
         if (!state.isPlaying) {
             if (state.isRestartLocked) return;
-            clearGameOverUI(); startGame(); btnAction.innerText = "SPACE!";
+            startGame(); btnAction.innerText = "SPACE!";
         } else { increaseGauge(); }
     }
 
