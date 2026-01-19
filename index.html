@@ -14,9 +14,7 @@
             font-display: swap;
         }
 
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
 
         body {
             font-family: 'Escoredream', sans-serif;
@@ -24,16 +22,14 @@
             padding: 0;
             width: 100vw;
             height: 100vh;
-            overflow: hidden; /* 스크롤 방지 */
-            background-color: #000; /* 레터박스 색상 */
-            /* 배경 이미지는 게임 컨테이너 밖이 아니라 컨테이너 뒤쪽 혹은 꽉 차게 처리 */
+            overflow: hidden;
+            background-color: #000;
             display: flex;
             justify-content: center;
             align-items: center;
-            touch-action: none; /* 모바일 제스처 방지 */
+            touch-action: none;
         }
 
-        /* 배경 (화면 전체 덮기) */
         #global-bg {
             position: fixed;
             top: 0;
@@ -45,14 +41,14 @@
             z-index: -1;
         }
 
-        /* ==================== 모달 스타일 ==================== */
+        /* 인트로 모달 */
         #intro-modal {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.7);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -108,16 +104,13 @@
         .flash-red { animation: flash-r 0.6s ease-out; }
         @keyframes flash-r { 0% { background-color: red; opacity: 0.6; } 100% { background-color: red; opacity: 0; } }
 
-        /* [핵심] 게임 컨테이너: 크기 고정, 스케일링으로 조정 */
         #game-container {
-            width: 800px;  /* 기준 너비 */
-            height: 500px; /* 기준 높이 */
+            width: 800px;
+            height: 500px;
             position: absolute;
             top: 50%;
             left: 50%;
-            /* transform은 JS에서 제어 (translate(-50%, -50%) scale(...)) */
             transform-origin: center center;
-            
             background: url('images/box.png') no-repeat center center;
             background-size: 100% 100%; 
             box-shadow: 0 20px 50px rgba(0,0,0,0.5);
@@ -398,27 +391,15 @@
 </div>
 
 <script>
-    // [신규] 화면 비율 고정 로직
     function resizeGame() {
         const gameContainer = document.getElementById('game-container');
         const targetWidth = 800;
         const targetHeight = 500;
-        
         const windowWidth = window.innerWidth;
         const windowHeight = window.innerHeight;
-        
-        // 화면 대비 게임 컨테이너의 비율 계산
-        const scaleX = windowWidth / targetWidth;
-        const scaleY = windowHeight / targetHeight;
-        
-        // 더 작은 비율에 맞춰 축소/확대 (화면에 꽉 차게)
-        const scale = Math.min(scaleX, scaleY);
-        
-        // 스케일 적용 (중앙 정렬 유지)
+        const scale = Math.min(windowWidth / targetWidth, windowHeight / targetHeight);
         gameContainer.style.transform = `translate(-50%, -50%) scale(${scale})`;
     }
-
-    // 초기 실행 및 리사이즈 이벤트 등록
     window.addEventListener('resize', resizeGame);
     window.addEventListener('load', resizeGame);
 
@@ -457,6 +438,8 @@
     btnIntroClose.addEventListener('click', () => {
         elIntroModal.style.display = 'none';
         state.isModalOpen = false;
+        // 게임 시작 시 lastTime 초기화 (델타 타임 튀는 것 방지)
+        state.lastTime = performance.now();
     });
 
     function getStageStats(stageLevel) {
@@ -500,15 +483,30 @@
 
     function gameLoop(timestamp) {
         if (!state.isPlaying) return;
-        const dt = (timestamp - state.lastTime) / 1000;
+
+        // [중요] Delta Time 보정 (60FPS 기준)
+        const dt = (timestamp - state.lastTime) / 1000; // 초 단위 경과 시간
         state.lastTime = timestamp;
+        
+        // 60FPS 기준 비율 (약 1.0)
+        // 120FPS라면 dt가 절반이므로 timeScale은 약 0.5가 됨
+        // 30FPS라면 dt가 두배이므로 timeScale은 약 2.0이 됨
+        const timeScale = dt * 60; 
+
         const stats = getStageStats(state.stage);
 
-        if (state.gauge > 0) { state.gauge -= stats.decay; if (state.gauge < 0) state.gauge = 0; }
+        // 1. 게이지 감소 (시간 보정 적용)
+        if (state.gauge > 0) { 
+            state.gauge -= stats.decay * timeScale; 
+            if (state.gauge < 0) state.gauge = 0; 
+        }
 
-        if (Math.abs(state.targetPos - state.targetDest) < 2) { state.targetDest = Math.random() * 80 + 15; }
+        // 2. 판정선 이동 (시간 보정 적용)
+        if (Math.abs(state.targetPos - state.targetDest) < 2) { 
+            state.targetDest = Math.random() * 80 + 15; 
+        }
         const direction = state.targetDest > state.targetPos ? 1 : -1;
-        state.targetPos += direction * stats.targetSpeed;
+        state.targetPos += direction * stats.targetSpeed * timeScale;
 
         let diff = Math.abs(state.gauge - state.targetPos);
         let rawEfficiency = 0, rawJudgment = "MISS";
@@ -522,15 +520,21 @@
 
         let finalJudgment = rawJudgment;
         if (rawJudgment === "PERFECT") { state.graceTimer = CONFIG.gracePeriod; }
-        else if (state.graceTimer > 0) { state.graceTimer -= dt; finalJudgment = "PERFECT"; rawEfficiency = 1; }
+        else if (state.graceTimer > 0) { 
+            state.graceTimer -= dt; // 타이머는 실제 초 단위 감소
+            finalJudgment = "PERFECT"; 
+            rawEfficiency = 1; 
+        }
 
         let displayText = "", textGlow = "", moveAmount = 0, bgClass = "bg-normal", effectAlpha = 0.2;
 
+        // 3. A 위치 이동 계산 (시간 보정 적용)
         if (finalJudgment === "LOW") {
             displayText = "LOW"; textGlow = "0 0 10px #888"; 
-            moveAmount = stats.enemySpeed; state.perfectDuration = 0; bgClass = "bg-miss";
+            moveAmount = stats.enemySpeed * timeScale; // 적이 당김
+            state.perfectDuration = 0; bgClass = "bg-miss";
         } else if (finalJudgment === "PERFECT") {
-            state.perfectDuration += dt;
+            state.perfectDuration += dt; // 실제 시간 누적
             let currentPullSpeed = CONFIG.perfectPullSpeed;
             if (state.perfectDuration >= CONFIG.sustainThreshold) {
                 const extraTime = state.perfectDuration - CONFIG.sustainThreshold;
@@ -543,18 +547,20 @@
                 displayText = "PERFECT"; textGlow = "0 0 10px #4caf50, 0 0 20px #4caf50"; 
                 bgClass = "bg-perfect"; effectAlpha = 0.7;
             }
-            moveAmount = -currentPullSpeed;
+            moveAmount = -currentPullSpeed * timeScale; // 내가 당김
         } else if (finalJudgment === "GOOD") {
             state.perfectDuration = 0; displayText = "GOOD"; textGlow = "0 0 10px #ffeb3b, 0 0 20px #ffeb3b"; 
-            moveAmount = stats.enemySpeed - (CONFIG.pullPower * rawEfficiency);
+            moveAmount = (stats.enemySpeed - (CONFIG.pullPower * rawEfficiency)) * timeScale;
             bgClass = "bg-good"; effectAlpha = 0.2 + (rawEfficiency * 0.5);
         } else {
             state.perfectDuration = 0; displayText = "MISS"; textGlow = "0 0 10px #f44336, 0 0 20px #f44336"; 
-            moveAmount = stats.enemySpeed; bgClass = "bg-miss"; effectAlpha = 0.2;
+            moveAmount = stats.enemySpeed * timeScale;
+            bgClass = "bg-miss"; effectAlpha = 0.2;
         }
 
         elAccuracyText.innerText = displayText; elAccuracyText.style.textShadow = textGlow;
         elBgOverlay.className = bgClass; elEffectC.style.opacity = effectAlpha;
+        
         state.posA += moveAmount;
 
         if (state.posA <= 0) winStage();
@@ -579,8 +585,10 @@
 
     function startGame() {
         state.isPlaying = true; state.posA = 50; state.gauge = 0; state.stage = 1;
-        state.targetPos = 50; state.targetDest = 60; state.lastTime = performance.now();
+        state.targetPos = 50; state.targetDest = 60; 
+        state.lastTime = performance.now(); // 시간 초기화
         state.perfectDuration = 0; state.graceTimer = 0;
+        
         elStageInfo.innerText = "STAGE 1"; elFloatingContainer.innerHTML = '';
         elAccuracyText.innerText = "START"; elAccuracyText.style.textShadow = "none";
         elAccuracyText.style.fontSize = "24px"; 
@@ -604,16 +612,16 @@
         elStageInfo.innerText = `STAGE ${state.stage}`;
         elFlashLayer.className = ""; void elFlashLayer.offsetWidth; elFlashLayer.classList.add("flash-white");
         elBgOverlay.className = "bg-normal";
-        state.posA = 50; state.gauge = 0; state.perfectDuration = 0; state.lastTime = performance.now();
+        state.posA = 50; state.gauge = 0; state.perfectDuration = 0; 
+        state.lastTime = performance.now(); // 시간 재설정
         render();
         state.animationId = requestAnimationFrame(gameLoop);
     }
 
     function gameOver() {
         state.isPlaying = false; state.isRestartLocked = true; cancelAnimationFrame(state.animationId);
-        elFloatingContainer.innerHTML = ''; 
-        elAccuracyText.innerText = ""; 
-
+        elFloatingContainer.innerHTML = ''; elAccuracyText.innerText = "";
+        
         const titleDiv = document.createElement('div');
         titleDiv.className = 'game-over-title'; titleDiv.innerText = 'GAME OVER';
         elFloatingContainer.appendChild(titleDiv);
@@ -659,9 +667,7 @@
         } else { increaseGauge(); }
     }
 
-    // 초기 실행
     updateStatsUI(null); render();
-    // 로드 후 100ms 뒤에 한번 더 리사이즈 (모바일 주소창 대응)
     setTimeout(resizeGame, 100);
 </script>
 </body>
