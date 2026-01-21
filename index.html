@@ -48,7 +48,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.85);
+            background: rgba(0, 0, 0, 0.7);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -87,12 +87,13 @@
             box-shadow: 0 5px 0 #00bfa5;
             font-family: 'Escoredream', sans-serif;
             display: block;
-            margin: 10px auto 20px auto;
+            margin: 10px auto 20px auto; /* 아래쪽 여백 추가 */
         }
 
+        /* [신규] 저작권 고지 텍스트 스타일 */
         .disclaimer-text {
             font-size: 11px;
-            color: #aaa;
+            color: #aaa; /* 밝은 회색 */
             text-align: center;
             line-height: 1.4;
             margin-top: 10px;
@@ -116,7 +117,6 @@
         .flash-red { animation: flash-r 0.6s ease-out; }
         @keyframes flash-r { 0% { background-color: red; opacity: 0.6; } 100% { background-color: red; opacity: 0; } }
 
-        /* 게임 컨테이너 */
         #game-container {
             width: 800px;
             height: 500px;
@@ -129,7 +129,7 @@
             box-shadow: 0 20px 50px rgba(0,0,0,0.5);
             display: flex;
             flex-direction: column;
-            justify-content: flex-start; /* 상단 정렬 */
+            justify-content: flex-start; 
             align-items: center;
             overflow: hidden; 
         }
@@ -151,32 +151,25 @@
         .bg-bonus { background-color: #63F2FF; opacity: 0.6; }
         .bg-miss { background-color: #3DFFEA; opacity: 0.05; }
 
-        /* 상단 UI 영역 */
-        #top-ui-area {
-            width: 100%;
-            height: 120px; /* 상단 고정 높이 */
-            position: relative;
-            z-index: 50;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
         #stage-info {
+            margin-top: 30px; 
             font-size: 28px;
             color: #fff;
             text-shadow: 0 2px 4px rgba(0,0,0,0.8);
             font-weight: bold;
-            margin-bottom: 5px;
+            z-index: 10;
         }
 
         #floating-text-container {
-            height: 30px;
+            position: relative; 
+            height: 80px; 
             width: 100%;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
+            justify-content: center;
+            z-index: 50;
+            pointer-events: none;
         }
         
         .hit-text {
@@ -188,54 +181,32 @@
         }
 
         @keyframes floatUpFade {
-            0% { opacity: 0; transform: translateY(5px); }
+            0% { opacity: 0; transform: translateY(10px); }
             10% { opacity: 1; transform: translateY(0); }
-            80% { opacity: 1; transform: translateY(-5px); }
-            100% { opacity: 0; transform: translateY(-15px); }
+            80% { opacity: 1; transform: translateY(-10px); }
+            100% { opacity: 0; transform: translateY(-20px); }
         }
 
-        /* 플레이 영역 (레인들이 들어갈 곳) */
-        #play-area {
-            flex-grow: 1;
-            width: 100%;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            justify-content: center; /* 세로 중앙 정렬 */
-            align-items: center;
-            z-index: 10;
-            padding: 0 20px;
-        }
-
-        /* 개별 레인 래퍼 */
-        .lane-wrapper {
-            width: 100%;
-            position: relative;
-            margin-bottom: 10px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .lane-text {
-            height: 20px;
-            font-size: 16px;
+        #accuracy-text {
+            height: 30px;
+            font-size: 24px;
             font-weight: bold;
-            color: #fff;
-            text-shadow: 1px 1px 2px black;
-            margin-bottom: 2px;
-            white-space: nowrap;
+            color: #fff; 
+            z-index: 10;
+            margin-bottom: 20px; 
+            white-space: nowrap; 
         }
 
         .field-track {
             position: relative;
             width: 90%;
-            height: 60px; /* 기본 높이 */
+            height: 80px;
             background: rgba(0, 0, 0, 0.3); 
             border: 2px solid rgba(255, 255, 255, 0.2);
-            border-radius: 30px;
-            margin-bottom: 5px; 
+            border-radius: 40px;
+            margin-bottom: 25px; 
             overflow: visible; 
+            z-index: 5; 
         }
 
         .obj-image {
@@ -245,21 +216,15 @@
             z-index: 20;
         }
 
-        .img-c { left: -20px; width: 80px; height: auto; }
-        .img-b { right: -30px; width: 60px; height: auto; }
-        .player-a { 
-            width: 60px; height: auto; 
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 30;
-            transition: left 0.1s linear; 
-        }
-
-        .effect-c {
+        #img-c { left: -20px; width: 100px; height: auto; }
+        
+        #effect-c {
             position: absolute;
-            left: -40px; top: 50%;
-            transform: translateY(-50%) scale(2.0);
-            width: 120px; height: 120px;
+            left: -50px;
+            top: 50%;
+            transform: translateY(-50%) scale(2.4);
+            width: 160px;
+            height: 160px;
             background: url('images/ef.png') no-repeat center center;
             background-size: contain;
             z-index: 15;
@@ -268,69 +233,95 @@
             pointer-events: none;
         }
 
+        #img-b { right: -39px; width: 80px; height: auto; }
+
+        #player-a {
+            width: 77px; 
+            height: auto;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 30;
+            transition: left 0.1s linear;
+        }
+
         .gauge-container {
             position: relative;
             width: 70%;
-            height: 15px; /* 게이지 얇게 */
+            height: 30px;
             background: rgba(0, 0, 0, 0.5);
-            border-radius: 8px;
+            border-radius: 15px;
             border: 1px solid rgba(255,255,255,0.3);
             overflow: hidden;
+            z-index: 10;
+            margin-bottom: 20px; 
         }
 
-        .gauge-fill {
+        #gauge-fill {
             width: 0%;
             height: 100%;
-            /* 색상은 JS에서 랜덤 지정 */
             background: linear-gradient(90deg, #3DFFEA, #63F2FF);
             box-shadow: 0 0 10px #3DFFEA;
             transition: width 0.05s linear;
         }
 
-        .target-line {
+        #target-line {
             position: absolute;
-            top: 0; left: 50%;
-            width: 4px; height: 100%;
+            top: 0;
+            left: 50%;
+            width: 4px;
+            height: 100%;
             background: #000;
             border: 1px solid #fff;
             box-sizing: border-box;
             z-index: 5;
         }
 
-        /* 하단 버튼 영역 */
-        #controls-area {
-            width: 100%;
-            height: 80px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px; /* 버튼 사이 간격 */
-            padding-bottom: 20px;
-            z-index: 50;
+        #stats-corner {
+            position: absolute;
+            bottom: 15px;
+            left: 20px;
+            text-align: left;
+            z-index: 10;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.5;
         }
+        
+        .stat-val { color: #fff; font-weight: bold; }
+        .stat-diff {
+            display: inline-block;
+            margin-left: 5px;
+            font-size: 11px;
+            font-weight: bold;
+            opacity: 0; 
+            transition: opacity 1.5s ease-in; 
+        }
+        .diff-bad { color: #ff5252; }
+        .diff-good { color: #4caf50; }
 
-        .action-btn {
-            padding: 10px 20px;
-            font-size: 18px;
+        #action-btn {
+            padding: 15px 40px;
+            font-size: 20px;
             background: rgba(61, 255, 234, 0.3);
             border: 2px solid #fff;
             color: #fff;
             font-weight: bold;
             border-radius: 10px;
             cursor: pointer;
-            box-shadow: 0 0 10px rgba(61, 255, 234, 0.5);
+            box-shadow: 0 0 15px rgba(61, 255, 234, 0.5);
             font-family: 'Escoredream', sans-serif;
+            z-index: 50; 
+            margin-top: 5px;
             transition: all 0.1s;
             -webkit-tap-highlight-color: transparent;
             user-select: none;
-            min-width: 100px;
         }
-        .action-btn:active, .action-btn.pressed {
+        #action-btn:active {
             background: rgba(61, 255, 234, 0.6);
             box-shadow: 0 0 5px rgba(61, 255, 234, 0.8);
             transform: scale(0.95);
         }
-        .action-btn.locked {
+        #action-btn.locked {
             background: rgba(100, 100, 100, 0.3);
             border-color: #888;
             color: #aaa;
@@ -338,38 +329,31 @@
             cursor: not-allowed;
         }
 
-        /* 스탯 구석 */
-        #stats-corner {
-            position: absolute;
-            bottom: 15px; left: 20px;
-            text-align: left; z-index: 60;
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.7);
-            line-height: 1.5;
-            pointer-events: none;
-        }
-        .stat-val { color: #fff; font-weight: bold; }
-        .stat-diff {
-            display: inline-block; margin-left: 5px;
-            font-size: 11px; font-weight: bold;
-            opacity: 0; transition: opacity 1.5s ease-in;
-        }
-        .diff-bad { color: #ff5252; } .diff-good { color: #4caf50; }
-
-        /* 게임오버 스타일 */
         .game-over-title {
-            position: absolute; top: 40%; left: 50%;
+            position: absolute; 
+            top: 40%;
+            left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 60px; font-weight: 900;
-            color: #ff3333; text-shadow: 3px 3px 0 #fff, 0 0 20px #ff0000;
-            z-index: 100; width: 100%; text-align: center;
+            font-size: 60px;
+            font-weight: 900;
+            color: #ff3333;
+            text-shadow: 3px 3px 0 #fff, 0 0 20px #ff0000;
+            z-index: 100;
+            width: 100%;
+            text-align: center;
         }
+
         .game-over-sub {
-            position: absolute; top: 48%; left: 50%;
+            position: absolute;
+            top: 48%;
+            left: 50%;
             transform: translateX(-50%);
-            font-size: 18px; color: #fff;
+            font-size: 18px;
+            color: #fff;
             text-shadow: 1px 1px 2px black;
-            z-index: 100; text-align: center; line-height: 1.5;
+            z-index: 100;
+            text-align: center;
+            line-height: 1.5;
         }
     </style>
 </head>
@@ -385,6 +369,7 @@
         <p>스테이지가 올라갈수록 판정선은 더 빠르게 움직이고, <span class="highlight-blue">칼리스토</span>도 재빨라집니다.</p>
         <p><span class="highlight-blue">마튼</span>이 몇 명의 <span class="highlight-blue">호엔하임</span>을 구할 수 있을까요?</p>
         <button id="intro-close-btn">확인</button>
+        
         <div class="disclaimer-text">
             이 프로젝트는 프로젝트문 창작물의 2차창작 팬 프로그램입니다. 비영리 목적으로 제작되었으며, 원작자의 가이드라인을 최대한 준수하고자 합니다. 포함된 아트워크의 권리와 저작권은 해당 저작권자가 가지고 있음을 알립니다.
         </div>
@@ -395,12 +380,9 @@
 
 <div id="game-container">
     <div id="bg-overlay"></div>
+    <div id="stage-info">STAGE 1</div>
+    <div id="floating-text-container"></div>
     
-    <div id="top-ui-area">
-        <div id="stage-info">STAGE 1</div>
-        <div id="floating-text-container"></div>
-    </div>
-
     <div id="stats-corner">
         <div>게이지 감소량: <span id="disp-decay" class="stat-val">1.0x</span> <span id="diff-decay" class="stat-diff diff-bad"></span></div>
         <div>칼리스토 속도: <span id="disp-enemy" class="stat-val">1.0x</span> <span id="diff-enemy" class="stat-diff diff-bad"></span></div>
@@ -408,13 +390,24 @@
         <div>클릭 파워: <span id="disp-click" class="stat-val">1.0x</span> <span id="diff-click" class="stat-diff diff-good"></span></div>
     </div>
 
-    <div id="play-area"></div>
+    <div id="accuracy-text">READY</div>
 
-    <div id="controls-area"></div>
+    <div class="field-track">
+        <div id="effect-c"></div>
+        <img src="images/C.png" id="img-c" class="obj-image" alt="C">
+        <img src="images/A.png" id="player-a" class="obj-image" alt="A">
+        <img src="images/B.png" id="img-b" class="obj-image" alt="B">
+    </div>
+
+    <div class="gauge-container">
+        <div id="gauge-fill"></div>
+        <div id="target-line"></div>
+    </div>
+
+    <button id="action-btn">SPACE! (SPACE)</button>
 </div>
 
 <script>
-    // 화면 크기 조정
     function resizeGame() {
         const gameContainer = document.getElementById('game-container');
         const targetWidth = 800;
@@ -427,7 +420,6 @@
     window.addEventListener('resize', resizeGame);
     window.addEventListener('load', resizeGame);
 
-    // ================== CONFIG & STATE ==================
     const CONFIG = {
         baseDecay: 1.0, decayGrowth: 0.12, baseClick: 16, clickGrowth: 0.5,
         baseEnemySpeed: 0.06, pullPower: 0.5, perfectPullSpeed: 0.6,
@@ -436,421 +428,46 @@
         gracePeriod: 0.05 
     };
 
-    // 키 매핑 (0: Space, 1: M, 2: N ...)
-    const KEY_MAP_CODES = ['Space', 'KeyM', 'KeyN', 'KeyB', 'KeyV', 'KeyC', 'KeyX', 'KeyZ'];
-    const KEY_LABELS = ['SPACE', 'M', 'N', 'B', 'V', 'C', 'X', 'Z'];
-
     let state = {
-        stage: 1,
-        isPlaying: false,
-        lastTime: 0,
-        graceTimer: 0,
-        isRestartLocked: false,
-        isModalOpen: true,
-        // 멀티 레인 상태 배열
-        lanes: [] 
+        stage: 1, posA: 50, gauge: 0, targetPos: 60, targetDest: 60,
+        isPlaying: false, lastTime: 0, perfectDuration: 0, graceTimer: 0,
+        isRestartLocked: false, isModalOpen: true 
     };
 
-    // ================== DOM Elements ==================
     const elIntroModal = document.getElementById('intro-modal');
     const btnIntroClose = document.getElementById('intro-close-btn');
     const elFlashLayer = document.getElementById('flash-layer');
     const elBgOverlay = document.getElementById('bg-overlay');
+    const elPlayerA = document.getElementById('player-a');
+    const elGaugeFill = document.getElementById('gauge-fill');
+    const elTargetLine = document.getElementById('target-line');
     const elStageInfo = document.getElementById('stage-info');
+    const elAccuracyText = document.getElementById('accuracy-text');
+    const btnAction = document.getElementById('action-btn');
     const elFloatingContainer = document.getElementById('floating-text-container');
-    const elPlayArea = document.getElementById('play-area');
-    const elControlsArea = document.getElementById('controls-area');
+    const elEffectC = document.getElementById('effect-c');
     
-    // Stats
     const elDispDecay = document.getElementById('disp-decay'), elDiffDecay = document.getElementById('diff-decay');
     const elDispEnemy = document.getElementById('disp-enemy'), elDiffEnemy = document.getElementById('diff-enemy');
     const elDispTarget = document.getElementById('disp-target'), elDiffTarget = document.getElementById('diff-target');
     const elDispClick = document.getElementById('disp-click'), elDiffClick = document.getElementById('diff-click');
 
-    // ================== INTRO & CHEAT CODE ==================
-    let cheatBuffer = "";
-    window.addEventListener('keydown', (e) => {
-        if(state.isModalOpen) {
-            cheatBuffer += e.key;
-            if(cheatBuffer.endsWith("qwop123")) {
-                startGame(35); // 개발자 모드: 35스테이지 시작
-                elIntroModal.style.display = 'none';
-                state.isModalOpen = false;
-                state.lastTime = performance.now();
-            }
-        }
-    });
-
     btnIntroClose.addEventListener('click', () => {
         elIntroModal.style.display = 'none';
         state.isModalOpen = false;
         state.lastTime = performance.now();
-        // 기본 시작
-        if(!state.isPlaying) {
-            // 아직 게임 시작 전 상태 (준비)
-            setupStage(1);
-        }
     });
 
-    // ================== LOGIC ==================
-
-    function getLaneCount(stage) {
-        if(stage < 35) return 1;
-        // 35~54: 2개, 55~74: 3개 ...
-        return 2 + Math.floor((stage - 35) / 20);
-    }
-
-    function getStageStats(stage) {
-        let effectiveStage = stage;
-        
-        // 35스테이지 이상일 경우 속도 초기화 로직 적용
-        if (stage >= 35) {
-            const lanes = getLaneCount(stage);
-            // 35(2레인) -> 5스테이지급 속도
-            // 55(3레인) -> 7스테이지급 속도
-            // 기본값 5 + (레인수 - 2) * 2
-            const baseLevel = 5 + (lanes - 2) * 2;
-            const progress = (stage - 35) % 20;
-            effectiveStage = baseLevel + progress;
-        }
-
+    function getStageStats(stageLevel) {
         return {
-            decay: CONFIG.baseDecay + ((effectiveStage - 1) * CONFIG.decayGrowth),
-            click: CONFIG.baseClick + ((effectiveStage - 1) * CONFIG.clickGrowth),
-            enemySpeed: CONFIG.baseEnemySpeed + ((effectiveStage - 1) * 0.02),
-            targetSpeed: CONFIG.targetMoveSpeed + ((effectiveStage - 1) * CONFIG.targetMoveGrowth)
+            decay: CONFIG.baseDecay + ((stageLevel - 1) * CONFIG.decayGrowth),
+            click: CONFIG.baseClick + ((stageLevel - 1) * CONFIG.clickGrowth),
+            enemySpeed: CONFIG.baseEnemySpeed + ((stageLevel - 1) * 0.02),
+            targetSpeed: CONFIG.targetMoveSpeed + ((stageLevel - 1) * CONFIG.targetMoveGrowth)
         };
     }
 
-    function getRandomColor() {
-        // 밝고 선명한 랜덤 색상
-        const h = Math.floor(Math.random() * 360);
-        return `hsl(${h}, 100%, 60%)`;
-    }
-
-    // DOM 생성 및 상태 초기화
-    function setupStage(stageNum) {
-        state.stage = stageNum;
-        const laneCount = getLaneCount(stageNum);
-        
-        // 상태 배열 초기화
-        state.lanes = [];
-        for(let i=0; i<laneCount; i++) {
-            state.lanes.push({
-                posA: 50,
-                gauge: 0,
-                targetPos: 60,
-                targetDest: 60,
-                perfectDuration: 0,
-                text: "READY",
-                textGlow: "",
-                bgClass: "bg-normal",
-                effectAlpha: 0.2,
-                color: i === 0 ? "linear-gradient(90deg, #3DFFEA, #63F2FF)" : getRandomColor() // 1번은 기본색, 나머지는 랜덤
-            });
-        }
-
-        // DOM 재생성
-        elPlayArea.innerHTML = "";
-        elControlsArea.innerHTML = "";
-
-        state.lanes.forEach((lane, idx) => {
-            // 레인 UI 생성
-            const wrapper = document.createElement('div');
-            wrapper.className = 'lane-wrapper';
-            
-            // 텍스트 (판정 등)
-            const textBox = document.createElement('div');
-            textBox.className = 'lane-text';
-            textBox.id = `text-${idx}`;
-            textBox.innerText = lane.text;
-            wrapper.appendChild(textBox);
-
-            // 트랙
-            const track = document.createElement('div');
-            track.className = 'field-track';
-            // 레인이 많아지면 높이 줄임 (기본 60px)
-            if(laneCount >= 3) track.style.height = "50px";
-            if(laneCount >= 4) track.style.height = "40px";
-
-            track.innerHTML = `
-                <div id="effect-${idx}" class="effect-c"></div>
-                <img src="images/C.png" class="obj-image img-c" alt="C">
-                <img src="images/A.png" id="player-${idx}" class="obj-image player-a" alt="A">
-                <img src="images/B.png" class="obj-image img-b" alt="B">
-            `;
-            wrapper.appendChild(track);
-
-            // 게이지
-            const gaugeBox = document.createElement('div');
-            gaugeBox.className = 'gauge-container';
-            gaugeBox.innerHTML = `
-                <div id="gauge-fill-${idx}" class="gauge-fill"></div>
-                <div id="target-${idx}" class="target-line"></div>
-            `;
-            // 게이지 색상 적용 (JS 생성 시점이므로 직접 style 주입)
-            if(idx > 0) { // 0번은 CSS 기본값 사용, 1번부터 랜덤
-               // gaugeBox.querySelector('.gauge-fill').style.background = lane.color;
-               // 위 코드는 gradient가 아니라 단색이 될 수 있으므로, HSL을 받아서 그라데이션 처리
-               // 단순화를 위해 JS에서 받은 color 문자열 그대로 사용
-               // 단, 0번 외에는 box-shadow 색상도 맞춰주면 좋음.
-            }
-            wrapper.appendChild(gaugeBox);
-            elPlayArea.appendChild(wrapper);
-
-            // 0번이 아닌 경우 색상 적용 (DOM 추가 후)
-            if(idx > 0) {
-                const fill = document.getElementById(`gauge-fill-${idx}`);
-                fill.style.background = lane.color;
-                fill.style.boxShadow = `0 0 10px ${lane.color}`;
-            }
-
-            // 버튼 생성
-            const btn = document.createElement('button');
-            btn.className = 'action-btn';
-            btn.id = `btn-${idx}`;
-            const label = KEY_LABELS[idx] || '?';
-            btn.innerText = state.isPlaying ? `${label}!` : `${label}! (${label})`;
-            
-            // 모바일 터치 이벤트
-            btn.addEventListener('touchstart', (e) => {
-                e.preventDefault(); e.stopPropagation();
-                handleInput(idx);
-                btn.classList.add('pressed');
-                setTimeout(() => btn.classList.remove('pressed'), 100);
-            }, { passive: false });
-
-            // 마우스 클릭
-            btn.addEventListener('mousedown', (e) => {
-                e.stopPropagation();
-                handleInput(idx);
-            });
-
-            elControlsArea.appendChild(btn);
-        });
-
-        // 스탯 UI 갱신
-        updateStatsUI(null);
-        elStageInfo.innerText = `STAGE ${state.stage}`;
-        
-        // 플래시/배경 리셋
-        elFlashLayer.className = "";
-        elBgOverlay.className = "bg-normal";
-    }
-
-    function startGame(startStage = 1) {
-        state.isPlaying = true;
-        state.lastTime = performance.now();
-        state.graceTimer = 0;
-        setupStage(startStage);
-        
-        // 버튼 텍스트 변경 (게임중 모드)
-        state.lanes.forEach((_, idx) => {
-            const btn = document.getElementById(`btn-${idx}`);
-            if(btn) btn.innerText = `${KEY_LABELS[idx]}!`;
-        });
-        
-        state.animationId = requestAnimationFrame(gameLoop);
-    }
-
-    function handleInput(laneIdx) {
-        if(state.isModalOpen) return;
-        
-        // 게임 시작 전이면 아무 버튼이나 눌러도 시작 (단, 1레인 모드일때는 기존처럼)
-        // 멀티레인 테스트 중일때는 시작 함수 호출이 필요함
-        if (!state.isPlaying) {
-            if (state.isRestartLocked) return;
-            clearGameOverUI();
-            // 현재 설정된 스테이지로 시작 (재시작 시)
-            startGame(state.stage); 
-            return;
-        }
-
-        // 게임 중: 해당 레인 게이지 증가
-        if(state.lanes[laneIdx]) {
-            const stats = getStageStats(state.stage);
-            state.lanes[laneIdx].gauge += stats.click;
-            if(state.lanes[laneIdx].gauge > 100) state.lanes[laneIdx].gauge = 100;
-            
-            // 게이지 빤짝 효과
-            const fill = document.getElementById(`gauge-fill-${laneIdx}`);
-            if(fill) {
-                fill.style.filter = "brightness(1.5)";
-                setTimeout(() => fill.style.filter = "brightness(1)", 50);
-            }
-        }
-    }
-
-    // 키보드 입력 매핑
-    window.addEventListener('keydown', (e) => {
-        if(state.isModalOpen) return;
-        const keyIndex = KEY_MAP_CODES.indexOf(e.code);
-        
-        // 현재 활성화된 레인 개수 내의 키 입력만 처리
-        if(keyIndex !== -1 && keyIndex < state.lanes.length) {
-            handleInput(keyIndex);
-            
-            // 버튼 시각적 효과
-            const btn = document.getElementById(`btn-${keyIndex}`);
-            if(btn) {
-                btn.classList.add('pressed');
-                setTimeout(() => btn.classList.remove('pressed'), 100);
-            }
-        }
-    });
-
-    // ================== GAME LOOP ==================
-    function gameLoop(timestamp) {
-        if (!state.isPlaying) return;
-
-        const dt = (timestamp - state.lastTime) / 1000; 
-        state.lastTime = timestamp;
-        const timeScale = dt * 60; 
-        const stats = getStageStats(state.stage);
-
-        let allCleared = true; // 모든 레인이 클리어(0이하) 되었는지? -> 승리조건: 모두 0 도달? 
-        // 기존: A가 0에 도달하면 승리. 멀티레인에선? "하나라도 100가면 패배, 모두 0가면 승리"로 하자.
-        // 하지만 비동기적으로 움직이므로, 먼저 도착한 애는 0에서 대기?
-        // -> 단순화: 0에 도달하면 더이상 밀리지 않음. 모든 레인의 posA <= 0 이면 승리.
-
-        let anyGameOver = false;
-
-        // 모든 레인 업데이트
-        state.lanes.forEach((lane, idx) => {
-            // 1. 게이지 감소
-            if(lane.gauge > 0) {
-                lane.gauge -= stats.decay * timeScale;
-                if(lane.gauge < 0) lane.gauge = 0;
-            }
-
-            // 2. 판정선 이동
-            if (Math.abs(lane.targetPos - lane.targetDest) < 2) { 
-                lane.targetDest = Math.random() * 80 + 15; 
-            }
-            const direction = lane.targetDest > lane.targetPos ? 1 : -1;
-            lane.targetPos += direction * stats.targetSpeed * timeScale;
-
-            // 3. 판정 계산
-            let diff = Math.abs(lane.gauge - lane.targetPos);
-            let rawEfficiency = 0, rawJudgment = "MISS";
-
-            if (lane.gauge < CONFIG.minActiveGauge) { rawJudgment = "LOW"; }
-            else {
-                if (diff < CONFIG.tolerance) { rawJudgment = "PERFECT"; rawEfficiency = 1; }
-                else if (diff < 35) { rawJudgment = "GOOD"; rawEfficiency = 1 - ((diff - CONFIG.tolerance) / (35 - CONFIG.tolerance)); }
-                else { rawJudgment = "MISS"; rawEfficiency = 0; }
-            }
-
-            // 보정은 개별 타이머 필요? -> state.graceTimer는 전역이었음. 레인별로 분리해야 함?
-            // 단순화를 위해 현재는 보정 기능은 유지하되 로직은 프레임단위 판정으로 진행
-            // *완벽한 구현을 위해선 lane 객체 안에 graceTimer가 있어야 함 (위 초기화 코드에 넣었음)*
-            
-            // 보정 로직 (레인별)
-            let finalJudgment = rawJudgment;
-            /* (간소화를 위해 보정 타이머 로직은 잠시 생략하거나 추후 추가, 현재는 즉시 판정) */
-            
-            // 텍스트 & 힘 계산
-            let moveAmount = 0;
-            
-            if (finalJudgment === "LOW") {
-                lane.text = "LOW";
-                lane.textGlow = "0 0 10px #888";
-                moveAmount = stats.enemySpeed * timeScale;
-                lane.perfectDuration = 0;
-                lane.bgClass = "bg-miss";
-            } else if (finalJudgment === "PERFECT") {
-                lane.perfectDuration += dt;
-                let currentPullSpeed = CONFIG.perfectPullSpeed;
-                if (lane.perfectDuration >= CONFIG.sustainThreshold) {
-                    // MAX
-                    const extraTime = lane.perfectDuration - CONFIG.sustainThreshold;
-                    const extraSteps = Math.floor(extraTime / CONFIG.sustainInterval);
-                    const multiplier = CONFIG.sustainBaseMult + (extraSteps * CONFIG.sustainIncMult);
-                    currentPullSpeed *= multiplier;
-                    lane.text = `MAX x${multiplier.toFixed(2)}`;
-                    lane.textGlow = "0 0 10px #00e5ff"; // lane.color로 하면 더 좋음
-                    lane.bgClass = "bg-bonus";
-                    lane.effectAlpha = 0.9;
-                } else {
-                    lane.text = "PERFECT";
-                    lane.textGlow = "0 0 10px #4caf50";
-                    lane.bgClass = "bg-perfect";
-                    lane.effectAlpha = 0.7;
-                }
-                moveAmount = -currentPullSpeed * timeScale;
-            } else if (finalJudgment === "GOOD") {
-                lane.perfectDuration = 0;
-                lane.text = "GOOD";
-                lane.textGlow = "0 0 10px #ffeb3b";
-                moveAmount = (stats.enemySpeed - (CONFIG.pullPower * rawEfficiency)) * timeScale;
-                lane.bgClass = "bg-good";
-                lane.effectAlpha = 0.2 + (rawEfficiency * 0.5);
-            } else {
-                lane.perfectDuration = 0;
-                lane.text = "MISS";
-                lane.textGlow = "0 0 10px #f44336";
-                moveAmount = stats.enemySpeed * timeScale;
-                lane.bgClass = "bg-miss";
-                lane.effectAlpha = 0.2;
-            }
-
-            // 위치 이동
-            lane.posA += moveAmount;
-            
-            // 승리/패배 체크
-            if (lane.posA > 100) anyGameOver = true;
-            if (lane.posA > 0) allCleared = false; // 하나라도 0보다 크면 클리어 아님
-            if (lane.posA < 0) lane.posA = 0; // 0 이하로 내려가면 대기
-        });
-
-        // 렌더링
-        render();
-
-        if (anyGameOver) {
-            gameOver();
-        } else if (allCleared) {
-            winStage();
-        } else {
-            state.animationId = requestAnimationFrame(gameLoop);
-        }
-    }
-
-    function render() {
-        state.lanes.forEach((lane, idx) => {
-            // 이미지 이동
-            const player = document.getElementById(`player-${idx}`);
-            if(player) {
-                let vPos = lane.posA > 100 ? 100 : lane.posA; 
-                player.style.left = `${vPos}%`;
-            }
-            
-            // 게이지바
-            const fill = document.getElementById(`gauge-fill-${idx}`);
-            const line = document.getElementById(`target-${idx}`);
-            if(fill) fill.style.width = `${lane.gauge}%`;
-            if(line) line.style.left = `${lane.targetPos}%`;
-
-            // 텍스트
-            const txt = document.getElementById(`text-${idx}`);
-            if(txt) {
-                txt.innerText = lane.text;
-                txt.style.textShadow = lane.textGlow;
-            }
-
-            // 이펙트 (투명도)
-            const eff = document.getElementById(`effect-${idx}`);
-            if(eff) eff.style.opacity = lane.effectAlpha;
-        });
-
-        // 배경 오버레이 (가장 잘하는 레인 기준? 혹은 1번 레인 기준? -> 평균적인 분위기로)
-        // 여기선 0번 레인의 상태를 배경에 반영하거나, 가장 높은 상태를 반영
-        // 간단히 0번 레인 기준
-        if(state.lanes[0]) {
-            elBgOverlay.className = state.lanes[0].bgClass;
-        }
-    }
-
-    function updateStatsUI(prevStats) {
+    function updateStatsUI(prevStats = null) {
         const currStats = getStageStats(state.stage);
         elDispDecay.innerText = (currStats.decay / CONFIG.baseDecay).toFixed(2) + 'x';
         elDispEnemy.innerText = (currStats.enemySpeed / CONFIG.baseEnemySpeed).toFixed(2) + 'x';
@@ -880,6 +497,115 @@
         });
     }
 
+    function gameLoop(timestamp) {
+        if (!state.isPlaying) return;
+
+        const dt = (timestamp - state.lastTime) / 1000; 
+        state.lastTime = timestamp;
+        
+        const timeScale = dt * 60; 
+
+        const stats = getStageStats(state.stage);
+
+        if (state.gauge > 0) { 
+            state.gauge -= stats.decay * timeScale; 
+            if (state.gauge < 0) state.gauge = 0; 
+        }
+
+        if (Math.abs(state.targetPos - state.targetDest) < 2) { 
+            state.targetDest = Math.random() * 80 + 15; 
+        }
+        const direction = state.targetDest > state.targetPos ? 1 : -1;
+        state.targetPos += direction * stats.targetSpeed * timeScale;
+
+        let diff = Math.abs(state.gauge - state.targetPos);
+        let rawEfficiency = 0, rawJudgment = "MISS";
+
+        if (state.gauge < CONFIG.minActiveGauge) { rawJudgment = "LOW"; }
+        else {
+            if (diff < CONFIG.tolerance) { rawJudgment = "PERFECT"; rawEfficiency = 1; }
+            else if (diff < 35) { rawJudgment = "GOOD"; rawEfficiency = 1 - ((diff - CONFIG.tolerance) / (35 - CONFIG.tolerance)); }
+            else { rawJudgment = "MISS"; rawEfficiency = 0; }
+        }
+
+        let finalJudgment = rawJudgment;
+        if (rawJudgment === "PERFECT") { state.graceTimer = CONFIG.gracePeriod; }
+        else if (state.graceTimer > 0) { 
+            state.graceTimer -= dt; 
+            finalJudgment = "PERFECT"; 
+            rawEfficiency = 1; 
+        }
+
+        let displayText = "", textGlow = "", moveAmount = 0, bgClass = "bg-normal", effectAlpha = 0.2;
+
+        if (finalJudgment === "LOW") {
+            displayText = "LOW"; textGlow = "0 0 10px #888"; 
+            moveAmount = stats.enemySpeed * timeScale; 
+            state.perfectDuration = 0; bgClass = "bg-miss";
+        } else if (finalJudgment === "PERFECT") {
+            state.perfectDuration += dt; 
+            let currentPullSpeed = CONFIG.perfectPullSpeed;
+            if (state.perfectDuration >= CONFIG.sustainThreshold) {
+                const extraTime = state.perfectDuration - CONFIG.sustainThreshold;
+                const extraSteps = Math.floor(extraTime / CONFIG.sustainInterval);
+                const multiplier = CONFIG.sustainBaseMult + (extraSteps * CONFIG.sustainIncMult);
+                currentPullSpeed *= multiplier;
+                displayText = `MAX x${multiplier.toFixed(2)}`;
+                textGlow = "0 0 15px #00e5ff, 0 0 30px #00e5ff"; bgClass = "bg-bonus"; effectAlpha = 0.9;
+            } else {
+                displayText = "PERFECT"; textGlow = "0 0 10px #4caf50, 0 0 20px #4caf50"; 
+                bgClass = "bg-perfect"; effectAlpha = 0.7;
+            }
+            moveAmount = -currentPullSpeed * timeScale; 
+        } else if (finalJudgment === "GOOD") {
+            state.perfectDuration = 0; displayText = "GOOD"; textGlow = "0 0 10px #ffeb3b, 0 0 20px #ffeb3b"; 
+            moveAmount = (stats.enemySpeed - (CONFIG.pullPower * rawEfficiency)) * timeScale;
+            bgClass = "bg-good"; effectAlpha = 0.2 + (rawEfficiency * 0.5);
+        } else {
+            state.perfectDuration = 0; displayText = "MISS"; textGlow = "0 0 10px #f44336, 0 0 20px #f44336"; 
+            moveAmount = stats.enemySpeed * timeScale;
+            bgClass = "bg-miss"; effectAlpha = 0.2;
+        }
+
+        elAccuracyText.innerText = displayText; elAccuracyText.style.textShadow = textGlow;
+        elBgOverlay.className = bgClass; elEffectC.style.opacity = effectAlpha;
+        
+        state.posA += moveAmount;
+
+        if (state.posA <= 0) winStage();
+        else if (state.posA >= 100) gameOver();
+        else { render(); state.animationId = requestAnimationFrame(gameLoop); }
+    }
+
+    function render() {
+        let visualPos = state.posA < 0 ? 0 : (state.posA > 100 ? 100 : state.posA);
+        elPlayerA.style.left = `${visualPos}%`;
+        elGaugeFill.style.width = `${state.gauge}%`;
+        elTargetLine.style.left = `${state.targetPos}%`;
+    }
+
+    function increaseGauge() {
+        if (!state.isPlaying) return;
+        state.gauge += getStageStats(state.stage).click;
+        if (state.gauge > 100) state.gauge = 100;
+        elGaugeFill.style.filter = "brightness(1.5)";
+        setTimeout(() => elGaugeFill.style.filter = "brightness(1)", 50);
+    }
+
+    function startGame() {
+        state.isPlaying = true; state.posA = 50; state.gauge = 0; state.stage = 1;
+        state.targetPos = 50; state.targetDest = 60; 
+        state.lastTime = performance.now(); 
+        state.perfectDuration = 0; state.graceTimer = 0;
+        
+        elStageInfo.innerText = "STAGE 1"; elFloatingContainer.innerHTML = '';
+        elAccuracyText.innerText = "START"; elAccuracyText.style.textShadow = "none";
+        elAccuracyText.style.fontSize = "24px"; 
+        elFlashLayer.className = ""; elBgOverlay.className = "bg-normal";
+        updateStatsUI(null);
+        state.animationId = requestAnimationFrame(gameLoop);
+    }
+
     function showFloatingText(currStats) {
         elFloatingContainer.innerHTML = ''; 
         const div = document.createElement('div');
@@ -890,87 +616,68 @@
 
     function winStage() {
         cancelAnimationFrame(state.animationId);
-        const prevStats = getStageStats(state.stage); 
-        state.stage++;
-        
-        // 다음 스테이지 준비 (레인 수가 바뀔 수 있으므로 setupStage 호출)
-        setupStage(state.stage);
-        state.isPlaying = true; // setupStage가 isPlaying을 끄진 않지만 확실히
-        state.lastTime = performance.now();
-
-        showFloatingText(getStageStats(state.stage)); 
-        updateStatsUI(prevStats);
-
+        const prevStats = getStageStats(state.stage); state.stage++;
+        showFloatingText(getStageStats(state.stage)); updateStatsUI(prevStats);
+        elStageInfo.innerText = `STAGE ${state.stage}`;
         elFlashLayer.className = ""; void elFlashLayer.offsetWidth; elFlashLayer.classList.add("flash-white");
+        elBgOverlay.className = "bg-normal";
+        state.posA = 50; state.gauge = 0; state.perfectDuration = 0; 
+        state.lastTime = performance.now(); 
+        render();
         state.animationId = requestAnimationFrame(gameLoop);
     }
 
     function gameOver() {
-        state.isPlaying = false; 
-        state.isRestartLocked = true; 
-        cancelAnimationFrame(state.animationId);
-
-        // UI 정리
+        state.isPlaying = false; state.isRestartLocked = true; cancelAnimationFrame(state.animationId);
+        elFloatingContainer.innerHTML = ''; elAccuracyText.innerText = "";
+        
         const titleDiv = document.createElement('div');
         titleDiv.className = 'game-over-title'; titleDiv.innerText = 'GAME OVER';
-        // elPlayArea 위에 띄워야 함. position absolute이므로 container에 append
-        const container = document.getElementById('game-container');
-        // 기존 오버레이 제거 (혹시 있다면)
-        const oldTitle = container.querySelector('.game-over-title');
-        if(oldTitle) oldTitle.remove();
-        const oldSub = container.querySelector('.game-over-sub');
-        if(oldSub) oldSub.remove();
-
-        container.appendChild(titleDiv);
+        elFloatingContainer.appendChild(titleDiv);
 
         const savedMax = localStorage.getItem('ptw_max_stage') || 1;
         const maxStage = Math.max(state.stage, parseInt(savedMax));
         localStorage.setItem('ptw_max_stage', maxStage);
 
-        // 0번 레인의 텍스트박스 등을 활용하거나 별도 생성
-        // 멀티레인이므로 accuracy-text(READY 있던 곳)에 넣는게 깔끔하지 않을 수 있음(여러개라)
-        // -> 0번 레인의 text를 비우고, 별도 div를 띄우자.
-        // 요청: "게임오버 바로 밑에 기록 뜨게" -> 별도 div 생성
-        const subDiv = document.createElement('div');
-        subDiv.className = 'game-over-sub';
-        subDiv.innerHTML = `기록: STAGE ${state.stage} &nbsp;|&nbsp; 최고: STAGE ${maxStage}`;
-        container.appendChild(subDiv);
+        elAccuracyText.innerHTML = `기록: STAGE ${state.stage} &nbsp;|&nbsp; 최고: STAGE ${maxStage}`;
+        elAccuracyText.style.fontSize = "16px";
+        elAccuracyText.style.textShadow = "none";
+        elAccuracyText.style.color = "#fff";
 
         elFlashLayer.className = ""; void elFlashLayer.offsetWidth; elFlashLayer.classList.add("flash-red");
-        
-        // 버튼 잠금
-        state.lanes.forEach((_, idx) => {
-            const btn = document.getElementById(`btn-${idx}`);
-            if(btn) {
-                btn.innerText = "WAIT...";
-                btn.classList.add("locked");
-            }
-        });
-
-        setTimeout(() => {
-            state.isRestartLocked = false;
-            state.lanes.forEach((_, idx) => {
-                const btn = document.getElementById(`btn-${idx}`);
-                if(btn) {
-                    btn.innerText = idx===0 ? "RESTART (SPACE)" : "RESTART";
-                    btn.classList.remove("locked");
-                }
-            });
-        }, 2000);
+        btnAction.innerText = "WAIT..."; btnAction.classList.add("locked");
+        setTimeout(() => { state.isRestartLocked = false; btnAction.innerText = "RESTART"; btnAction.classList.remove("locked"); }, 2000);
     }
 
     function clearGameOverUI() {
-        const container = document.getElementById('game-container');
-        const oldTitle = container.querySelector('.game-over-title');
-        if(oldTitle) oldTitle.remove();
-        const oldSub = container.querySelector('.game-over-sub');
-        if(oldSub) oldSub.remove();
+        const sub = document.querySelector('.game-over-sub'); if(sub) sub.remove();
     }
 
-    // 초기 실행
-    setupStage(1); 
-    setTimeout(resizeGame, 100);
+    let lastTouchTime = 0;
+    btnAction.addEventListener('touchstart', (e) => {
+        e.preventDefault(); e.stopPropagation();
+        lastTouchTime = Date.now();
+        handleInput();
+    }, { passive: false });
 
+    btnAction.addEventListener('mousedown', (e) => {
+        e.stopPropagation();
+        if (Date.now() - lastTouchTime < 500) return; 
+        handleInput();
+    });
+
+    window.addEventListener('keydown', (e) => { if (e.code === 'Space') handleInput(); });
+
+    function handleInput() {
+        if (state.isModalOpen) return;
+        if (!state.isPlaying) {
+            if (state.isRestartLocked) return;
+            clearGameOverUI(); startGame(); btnAction.innerText = "SPACE!";
+        } else { increaseGauge(); }
+    }
+
+    updateStatsUI(null); render();
+    setTimeout(resizeGame, 100);
 </script>
 </body>
 </html>
