@@ -416,12 +416,14 @@
     const audioBuzz = new Audio('sounds/buzz.mp3');
     audioBuzz.volume = 1.0;
 
+    // [신규] MAX 사운드
+    const audioMax = new Audio('sounds/max.mp3');
+    audioMax.volume = 1.0;
+
     // BGM 재생 헬퍼
     let bgmStarted = false;
     function tryPlayBgm() {
-        // 이미 재생 중이면 무시
         if (bgmStarted && !audioBgm.paused) return;
-        
         audioBgm.play().then(() => {
             bgmStarted = true;
         }).catch(e => console.log("Audio autoplay restricted"));
@@ -438,7 +440,8 @@
     let state = {
         stage: 1, posA: 50, gauge: 0, targetPos: 60, targetDest: 60,
         isPlaying: false, lastTime: 0, perfectDuration: 0, graceTimer: 0,
-        isRestartLocked: false, isModalOpen: true 
+        isRestartLocked: false, isModalOpen: true,
+        isMaxState: false // [신규] MAX 상태 플래그
     };
 
     const elIntroModal = document.getElementById('intro-modal');
@@ -551,10 +554,18 @@
             displayText = "LOW"; textGlow = "0 0 10px #888"; 
             moveAmount = stats.enemySpeed * timeScale; 
             state.perfectDuration = 0; bgClass = "bg-miss";
+            state.isMaxState = false; // MAX 해제
         } else if (finalJudgment === "PERFECT") {
             state.perfectDuration += dt; 
             let currentPullSpeed = CONFIG.perfectPullSpeed;
             if (state.perfectDuration >= CONFIG.sustainThreshold) {
+                // [신규] MAX 진입 사운드 (한번만)
+                if (!state.isMaxState) {
+                    audioMax.currentTime = 0;
+                    audioMax.play().catch(e => {});
+                    state.isMaxState = true;
+                }
+
                 const extraTime = state.perfectDuration - CONFIG.sustainThreshold;
                 const extraSteps = Math.floor(extraTime / CONFIG.sustainInterval);
                 const multiplier = CONFIG.sustainBaseMult + (extraSteps * CONFIG.sustainIncMult);
@@ -564,16 +575,19 @@
             } else {
                 displayText = "PERFECT"; textGlow = "0 0 10px #4caf50, 0 0 20px #4caf50"; 
                 bgClass = "bg-perfect"; effectAlpha = 0.7;
+                state.isMaxState = false; // MAX 해제
             }
             moveAmount = -currentPullSpeed * timeScale; 
         } else if (finalJudgment === "GOOD") {
             state.perfectDuration = 0; displayText = "GOOD"; textGlow = "0 0 10px #ffeb3b, 0 0 20px #ffeb3b"; 
             moveAmount = (stats.enemySpeed - (CONFIG.pullPower * rawEfficiency)) * timeScale;
             bgClass = "bg-good"; effectAlpha = 0.2 + (rawEfficiency * 0.5);
+            state.isMaxState = false; // MAX 해제
         } else {
             state.perfectDuration = 0; displayText = "MISS"; textGlow = "0 0 10px #f44336, 0 0 20px #f44336"; 
             moveAmount = stats.enemySpeed * timeScale;
             bgClass = "bg-miss"; effectAlpha = 0.2;
+            state.isMaxState = false; // MAX 해제
         }
 
         elAccuracyText.innerText = displayText; elAccuracyText.style.textShadow = textGlow;
@@ -606,12 +620,15 @@
         state.targetPos = 50; state.targetDest = 60; 
         state.lastTime = performance.now(); 
         state.perfectDuration = 0; state.graceTimer = 0;
+        state.isMaxState = false;
         
         elStageInfo.innerText = "STAGE 1"; elFloatingContainer.innerHTML = '';
         elAccuracyText.innerText = "START"; elAccuracyText.style.textShadow = "none";
         elAccuracyText.style.fontSize = "24px"; 
         elFlashLayer.className = ""; elBgOverlay.className = "bg-normal";
         updateStatsUI(null);
+        
+        tryPlayBgm(); // 재시작 시 BGM 재생 시도
         state.animationId = requestAnimationFrame(gameLoop);
     }
 
@@ -628,7 +645,7 @@
         
         // [2] 스테이지 클리어 사운드
         audioDing.currentTime = 0; 
-        audioDing.play().catch(e => console.log(e));
+        audioDing.play().catch(e => console.log("Sound error:", e));
 
         const prevStats = getStageStats(state.stage); state.stage++;
         showFloatingText(getStageStats(state.stage)); updateStatsUI(prevStats);
@@ -637,6 +654,7 @@
         elBgOverlay.className = "bg-normal";
         state.posA = 50; state.gauge = 0; state.perfectDuration = 0; 
         state.lastTime = performance.now(); 
+        state.isMaxState = false;
         render();
         state.animationId = requestAnimationFrame(gameLoop);
     }
@@ -646,9 +664,9 @@
         
         // [3] 게임오버 사운드 & BGM 정지 + 리셋
         audioBgm.pause();
-        audioBgm.currentTime = 0; // 되감기
+        audioBgm.currentTime = 0; 
         audioBuzz.currentTime = 0;
-        audioBuzz.play().catch(e => console.log(e));
+        audioBuzz.play().catch(e => console.log("Sound error:", e));
 
         elFloatingContainer.innerHTML = ''; elAccuracyText.innerText = "";
         
@@ -693,17 +711,13 @@
     function handleInput() {
         if (state.isModalOpen) return;
         
-        // [4] 게임 시작 시 BGM 다시 재생
+        // 버튼 누를 때 BGM 재생 시도 (최초 실행용)
+        tryPlayBgm();
+
         if (!state.isPlaying) {
             if (state.isRestartLocked) return;
-            
-            tryPlayBgm(); // 여기서 다시 재생
-            clearGameOverUI(); 
-            startGame(); 
-            btnAction.innerText = "SPACE!";
-        } else { 
-            increaseGauge(); 
-        }
+            clearGameOverUI(); startGame(); btnAction.innerText = "SPACE!";
+        } else { increaseGauge(); }
     }
 
     updateStatsUI(null); render();
