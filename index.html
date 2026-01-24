@@ -87,13 +87,12 @@
             box-shadow: 0 5px 0 #00bfa5;
             font-family: 'Escoredream', sans-serif;
             display: block;
-            margin: 10px auto 20px auto; /* 아래쪽 여백 추가 */
+            margin: 10px auto 20px auto; 
         }
 
-        /* [신규] 저작권 고지 텍스트 스타일 */
         .disclaimer-text {
             font-size: 11px;
-            color: #aaa; /* 밝은 회색 */
+            color: #aaa; 
             text-align: center;
             line-height: 1.4;
             margin-top: 10px;
@@ -101,7 +100,6 @@
             padding-top: 10px;
         }
 
-        /* 플래시 레이어 */
         #flash-layer {
             position: fixed;
             top: 0;
@@ -216,7 +214,6 @@
             z-index: 20;
         }
 
-        /* 수정됨: width 100px -> 120px */
         #img-c { left: -20px; width: 120px; height: auto; }
         
         #effect-c {
@@ -343,19 +340,6 @@
             width: 100%;
             text-align: center;
         }
-
-        .game-over-sub {
-            position: absolute;
-            top: 48%;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 18px;
-            color: #fff;
-            text-shadow: 1px 1px 2px black;
-            z-index: 100;
-            text-align: center;
-            line-height: 1.5;
-        }
     </style>
 </head>
 <body>
@@ -421,6 +405,28 @@
     window.addEventListener('resize', resizeGame);
     window.addEventListener('load', resizeGame);
 
+    // [사운드 설정]
+    const audioBgm = new Audio('sounds/jazz.mp3');
+    audioBgm.loop = true;
+    audioBgm.volume = 0.5;
+
+    const audioDing = new Audio('sounds/ding.mp3');
+    audioDing.volume = 1.0;
+
+    const audioBuzz = new Audio('sounds/buzz.mp3');
+    audioBuzz.volume = 1.0;
+
+    // BGM 재생 헬퍼
+    let bgmStarted = false;
+    function tryPlayBgm() {
+        // 이미 재생 중이면 무시
+        if (bgmStarted && !audioBgm.paused) return;
+        
+        audioBgm.play().then(() => {
+            bgmStarted = true;
+        }).catch(e => console.log("Audio autoplay restricted"));
+    }
+
     const CONFIG = {
         baseDecay: 1.0, decayGrowth: 0.12, baseClick: 16, clickGrowth: 0.5,
         baseEnemySpeed: 0.06, pullPower: 0.5, perfectPullSpeed: 0.6,
@@ -453,10 +459,12 @@
     const elDispTarget = document.getElementById('disp-target'), elDiffTarget = document.getElementById('diff-target');
     const elDispClick = document.getElementById('disp-click'), elDiffClick = document.getElementById('diff-click');
 
+    // [1] 인트로 닫기 -> BGM 시작
     btnIntroClose.addEventListener('click', () => {
         elIntroModal.style.display = 'none';
         state.isModalOpen = false;
         state.lastTime = performance.now();
+        tryPlayBgm();
     });
 
     function getStageStats(stageLevel) {
@@ -617,6 +625,11 @@
 
     function winStage() {
         cancelAnimationFrame(state.animationId);
+        
+        // [2] 스테이지 클리어 사운드
+        audioDing.currentTime = 0; 
+        audioDing.play().catch(e => console.log(e));
+
         const prevStats = getStageStats(state.stage); state.stage++;
         showFloatingText(getStageStats(state.stage)); updateStatsUI(prevStats);
         elStageInfo.innerText = `STAGE ${state.stage}`;
@@ -630,6 +643,13 @@
 
     function gameOver() {
         state.isPlaying = false; state.isRestartLocked = true; cancelAnimationFrame(state.animationId);
+        
+        // [3] 게임오버 사운드 & BGM 정지 + 리셋
+        audioBgm.pause();
+        audioBgm.currentTime = 0; // 되감기
+        audioBuzz.currentTime = 0;
+        audioBuzz.play().catch(e => console.log(e));
+
         elFloatingContainer.innerHTML = ''; elAccuracyText.innerText = "";
         
         const titleDiv = document.createElement('div');
@@ -646,6 +666,7 @@
         elAccuracyText.style.color = "#fff";
 
         elFlashLayer.className = ""; void elFlashLayer.offsetWidth; elFlashLayer.classList.add("flash-red");
+        
         btnAction.innerText = "WAIT..."; btnAction.classList.add("locked");
         setTimeout(() => { state.isRestartLocked = false; btnAction.innerText = "RESTART"; btnAction.classList.remove("locked"); }, 2000);
     }
@@ -671,10 +692,18 @@
 
     function handleInput() {
         if (state.isModalOpen) return;
+        
+        // [4] 게임 시작 시 BGM 다시 재생
         if (!state.isPlaying) {
             if (state.isRestartLocked) return;
-            clearGameOverUI(); startGame(); btnAction.innerText = "SPACE!";
-        } else { increaseGauge(); }
+            
+            tryPlayBgm(); // 여기서 다시 재생
+            clearGameOverUI(); 
+            startGame(); 
+            btnAction.innerText = "SPACE!";
+        } else { 
+            increaseGauge(); 
+        }
     }
 
     updateStatsUI(null); render();
@@ -682,5 +711,3 @@
 </script>
 </body>
 </html>
-
-
